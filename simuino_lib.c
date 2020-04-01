@@ -86,6 +86,10 @@ int analyzeEvent(char *event)
     return(0); 
   }
 }
+
+/**
+ * Main window GUI for the Simuino
+ */
 //====================================
 void show(WINDOW *win)
 //====================================
@@ -128,7 +132,7 @@ void show(WINDOW *win)
   if(win == msg)
     {
       wmove(win,0,2);
-      wprintw(win,"----------Messages----------");
+      wprintw(win,"----------Messages(Test 1)----------");
     }
   
   wmove(uno,board_h-2,4);
