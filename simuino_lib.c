@@ -132,7 +132,7 @@ void show(WINDOW *win)
   if(win == msg)
     {
       wmove(win,0,2);
-      wprintw(win,"----------Messages(Test 1)----------");
+      wprintw(win,"----------Messages----------");
     }
   
   wmove(uno,board_h-2,4);
