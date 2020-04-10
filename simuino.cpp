@@ -27,9 +27,13 @@
 #include <sys/stat.h>
 #include <form.h>
 
+#include "ros/ros.h"
+#include "std_msgs/String.h"
+#include "ros/package.h"
+
 #include "servuino/common.h"
 
-
+#define CONST_FILE 280
 // Simulator status
 int x_pinMode[MAX_TOTAL_PINS][SCEN_MAX];
 int x_pinScenario[MAX_TOTAL_PINS][SCEN_MAX];
@@ -205,6 +209,35 @@ char  fileServPinrw[80]    = "servuino/serv.pinrw";
 char  fileServSerial[80]   = "servuino/serv.serial";
 char  fileServTime[80]     = "servuino/serv.time";
 
+/*
+char  fileTemp[80]         = "~/catkin_ws/src/arduino_link/src/simuino/temp.txt";
+char  fileInfoRun[80]      = "~/catkin_ws/src/arduino_link/src/simuino/help.txt";
+char  fileCopyError[80]    = "~/catkin_ws/src/arduino_link/src/simuino/copy.error";
+char  fileHints[80]        = "~/catkin_ws/src/arduino_link/src/simuino/hints.txt";
+char  fileInfoAdmin[80]    = "~/catkin_ws/src/arduino_link/src/simuino/help_command.txt";
+char  fileInfoGpl[80]      = "~/catkin_ws/src/arduino_link/src/simuino/gpl.txt";
+char  fileProjList[80]     = "~/catkin_ws/src/arduino_link/src/simuino/conf_list.txt";
+char  fileLog[80]          = "~/catkin_ws/src/arduino_link/src/simuino/log.txt";
+char  fileDefault[80]      = "~/catkin_ws/src/arduino_link/src/simuino/default.conf";
+char  fileError[80]        = "error.txt";
+char  fileServComp[80]     = "~/catkin_ws/src/arduino_link/src/simuino/servuino/g++.result";
+char  fileServSketch[80]   = "~/catkin_ws/src/arduino_link/src/simuino/servuino/sketch.ino";
+char  fileServArduino[80]  = "~/catkin_ws/src/arduino_link/src/simuino/servuino/serv.event";
+char  fileServError[80]    = "~/catkin_ws/src/arduino_link/src/simuino/servuino/serv.error";
+char  fileServScen[80]     = "~/catkin_ws/src/arduino_link/src/simuino/servuino/data.scen";
+char  fileServScenario[80] = "~/catkin_ws/src/arduino_link/src/simuino/servuino/data.scenario";
+char  fileServCode[80]     = "~/catkin_ws/src/arduino_link/src/simuino/servuino/data.code";
+char  fileServCustom[80]   = "~/catkin_ws/src/arduino_link/src/simuino/servuino/serv.cust";
+
+char  fileServInoDebug[80] = "~/catkin_ws/src/arduino_link/src/simuino/servuino/ino.debug";
+
+char  fileServPinmod[80]   = "~/catkin_ws/src/arduino_link/src/simuino/servuino/serv.pinmod";
+char  fileServDigval[80]   = "~/catkin_ws/src/arduino_link/src/simuino/servuino/serv.digval";
+char  fileServAnaval[80]   = "~/catkin_ws/src/arduino_link/src/simuino/servuino/serv.anaval";
+char  fileServPinrw[80]    = "~/catkin_ws/src/arduino_link/src/simuino/servuino/serv.pinrw";
+char  fileServSerial[80]   = "~/catkin_ws/src/arduino_link/src/simuino/servuino/serv.serial";
+char  fileServTime[80]     = "~/catkin_ws/src/arduino_link/src/simuino/servuino/serv.time";
+*/
 int  g_nScenDigital = 0;
 int  g_nScenAnalog  = 0;
 
@@ -322,7 +355,7 @@ void loadCurrentSketch()
   {
     if(confSteps < 0) confSteps = 100;
     if(confSteps > MAX_STEP) confSteps = MAX_STEP-1;
-    sprintf(syscom,"cd servuino;./servuino %d %d;",confSteps,g_scenSource);
+    sprintf(syscom,"cd ~/catkin_ws/src/arduino_link/src/simuino/servuino;./servuino %d %d;",confSteps,g_scenSource);
     x=system(syscom);
     initSim();
     resetSim();
@@ -419,7 +452,7 @@ void openCommand(char *argv[])
 	      if(ok == S_OK)
 		{
 		  g_scenSource = 1;
-		  sprintf(syscom,"cd servuino;./servuino %d %d %d %d %d %d %d;",confSteps,g_scenSource,g_pinType,g_pinNo,0,g_pinStep,S_DELETE);
+		  sprintf(syscom,"cd ~/catkin_ws/src/arduino_link/src/simuino/servuino;./servuino %d %d %d %d %d %d %d;",confSteps,g_scenSource,g_pinType,g_pinNo,0,g_pinStep,S_DELETE);
 		  //putMsg(2,syscom);
 		  tmp=system(syscom);
 		  initSim();
@@ -456,7 +489,7 @@ void openCommand(char *argv[])
 	      if(ok == S_OK)
 		{
 		  g_scenSource = 1;
-		  sprintf(syscom,"cd servuino;./servuino %d %d %d %d %d %d %d;",confSteps,g_scenSource,g_pinType,g_pinNo,g_pinValue,g_pinStep,S_ADD);
+		  sprintf(syscom,"cd ~/catkin_ws/src/arduino_link/src/simuino/servuino;./servuino %d %d %d %d %d %d %d;",confSteps,g_scenSource,g_pinType,g_pinNo,g_pinValue,g_pinStep,S_ADD);
 		  tmp=system(syscom);
 		  initSim();
 		  readSketchInfo();
@@ -497,7 +530,7 @@ void openCommand(char *argv[])
 
     else if(strstr(sstr,"list"))
 	{
-	  sprintf(syscom,"ls sketchbook/*.ino > %s;",fileProjList);
+	  sprintf(syscom,"ls ~/catkin_ws/src/arduino_link/src/simuino/sketchbook/*.ino > %s;",fileProjList);
 	  x=system(syscom);
 	  readMsg(fileProjList);	
 	}
@@ -648,7 +681,7 @@ void runMode(int stop)
   char tempName[80],syscom[120],temp[80];
   char command[40][40];
 
-  strcpy(tempName,"help.txt");
+  strcpy(tempName,"~/catkin_ws/src/arduino_link/src/simuino/help.txt");
 
   s_mode = S_RUN;
 
@@ -863,7 +896,7 @@ putMsg(2,syscom);
 		    {         
 		      g_scenSource = 1;
 		      // steps, source, pintype, pinno, pinvalue, pinstep
-		      sprintf(syscom,"cd servuino;./servuino %d %d %d %d %d %d %d;",confSteps,g_scenSource,g_pinType,g_pinNo,x,currentStep,S_ADD);
+		      sprintf(syscom,"cd ~/catkin_ws/src/arduino_link/src/simuino/servuino;./servuino %d %d %d %d %d %d %d;",confSteps,g_scenSource,g_pinType,g_pinNo,x,currentStep,S_ADD);
 		      tmp=system(syscom);
 		      initSim();
 		      readSketchInfo();
@@ -890,6 +923,33 @@ putMsg(2,syscom);
 int main(int argc, char *argv[])
 //====================================
 {
+
+  ros::init(argc, argv, "simuino");  
+  ros::NodeHandle n;
+  char *path_n;
+  char call[200];
+  //strcpy(path, getenv("HOME"));
+  //printf("Test: %s", path);
+  std::string path = ros::package::getPath("arduino_link");
+   ros::Publisher sim_pub = n.advertise<std_msgs::String>("simuino_test", 1000);  
+   ros::Rate loop_rate(10);
+   std_msgs::String msge;    
+   std::stringstream ss;    
+   ss << "Test " << path;    
+   msge.data = ss.str();    
+   ROS_INFO("%s", msge.data.c_str());    
+   sim_pub.publish(msge);    
+   ros::spinOnce();
+   loop_rate.sleep();
+   //++count;  
+   //int count = 0;
+   sprintf(call, "cd %s; pwd;", path.c_str());
+  system(call);
+  strcat(path_n, path.c_str());
+  strcat(path_n, "/src/simuino/");
+  if(chdir(path_n) != 0){
+	  perror("chdir failed to get to %s\n", path_n);
+  }
   char syscom[120];
   int ch,i,x;
 
@@ -908,7 +968,7 @@ int main(int argc, char *argv[])
   inrpt[5] = IR5;
 
 
-  sprintf(syscom,"ls sketchbook/*.ino > %s;",fileProjList);
+  sprintf(syscom,"ls ~/catkin_ws/src/arduino_link/src/simuino/sketchbook/*.ino > %s;",fileProjList);
   x=system(syscom);
   sprintf(syscom,"rm %s;touch %s;",fileTemp,fileTemp);
   x=system(syscom);

@@ -81,7 +81,7 @@ int analyzeEvent(char *event)
 	    g_pinValue = value;
 	    if(strstr(event,"analog"))  g_pinType = ANA;
 	    if(strstr(event,"digital")) g_pinType = DIG;
-      printf("ANEV: %s", p);
+      //printf("ANEV: %s", p);
     	return(g_pinType);
       } 
     return(0); 
@@ -178,7 +178,7 @@ void saveSetting()
   time_t lt;
 
   // Store setting
-  out = fopen("settings.txt","w");
+  out = fopen("~/catkin_ws/src/arduino_link/src/simuino/settings.txt","w");
   if(out == NULL)
     {
       showError("No setting file ",-1);
@@ -912,7 +912,11 @@ void readMsg(char *fileName)
   FILE *in;
   char row[SIZE_ROW],temp[SIZE_ROW],*p;
   int i=0,ch;
+  //char path[200];
+  //strcpy(path, "~/catkin_ws/src/arduino_link/src/simuino/");
+  //strcat(path, fileName);
 
+  //showError("in read msg",-1);
   wclear(msg);
   in = fopen(fileName,"r");
   if(in == NULL)
@@ -1496,11 +1500,11 @@ void anyErrors()
 //====================================
 {
   int x;
-  char syscom[200];
+  char syscom[500];
   
   g_existError = S_NO;
-  x = system("rm temp.txt");
-  sprintf(syscom,"cat %s %s %s> %s",fileError,fileServError,fileCopyError,fileTemp);
+  x = system("rm ~/catkin_ws/src/arduino_link/src/simuino/temp.txt");
+  sprintf(syscom,"cat ~/catkin_ws/src/arduino_link/src/simuino/%s ~/catkin_ws/src/arduino_link/src/simuino/%s ~/catkin_ws/src/arduino_link/src/simuino/%s> ~/catkin_ws/src/arduino_link/src/simuino/%s",fileError,fileServError,fileCopyError,fileTemp);
   x = system(syscom); 
   x = countRowsInFile(fileTemp);
   if(x > 0 && x != 999)
@@ -1508,7 +1512,7 @@ void anyErrors()
 	  g_existError = S_YES;
 	  g_currentSketchStatus = SO_RUN_ERROR;
   }
-  if(x == 999)putMsg(2,"Unable to read error file");
+  if(x == 999)putMsg(2,"Yo, Unable to read error file");
   show(uno);
 }
 
@@ -1518,15 +1522,22 @@ int loadSketch(char sketch[])
 //====================================
 {
   int x,ch,res;
-  char syscom[120];
+  char syscom[520];
 
-  sprintf(syscom,"cp %s %s > %s 2>&1;",sketch,fileServSketch,fileCopyError);
+  sprintf(syscom,"cp ~/catkin_ws/src/arduino_link/src/simuino/%s ~/catkin_ws/src/arduino_link/src/simuino/%s > ~/catkin_ws/src/arduino_link/src/simuino/%s 2>&1;",sketch,fileServSketch,fileCopyError);
   x=system(syscom);
   //strcpy(confSketchFile,sketch);
+  char temp[200];
+  char temp2[200];
+  strcpy(temp2, "~/catkin_ws/src/arduino_link/src/simuino/");
+  strcpy(temp, "~/catkin_ws/src/arduino_link/src/simuino/");
+  strcat(temp, fileServSketch);
+  strcat(temp2, sketch);
+  //printf("Load 1: %s", temp);
+  //printf("Load 2: %s", temp2);
+  instrument(temp2,temp);
 
-  instrument(sketch,fileServSketch);
-
-  sprintf(syscom,"cd servuino; g++ -O2 -o servuino servuino.c > g++.result 2>&1;");
+  sprintf(syscom,"cd ~/catkin_ws/src/arduino_link/src/simuino/servuino; g++ -O2 -o servuino servuino.cpp > g++.result 2>&1;");
   x=system(syscom);
 
   x=countRowsInFile(fileServComp);
@@ -1537,7 +1548,7 @@ int loadSketch(char sketch[])
       wprintw(msg,"press any key to continue >>");
       wrefresh(msg);
       ch = getchar();
-      putMsg(2,"Check your sketch or report an issue to Simuino");
+      putMsg(2,"ERROR: Check your sketch or report an issue to Simuino");
       return(1);
     }
   readSketchInfo();
