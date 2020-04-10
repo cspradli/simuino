@@ -233,10 +233,10 @@ char  gplFile[80];
 
 FILE  *err;
 
-#include "servuino/common_lib.c"
+#include "servuino/common_lib.cpp"
 #include "servuino/arduino.h"
 #include "simuino.h"
-#include "simuino_lib.c"
+#include "simuino_lib.cpp"
 
 //====================================
 int runStep(int dir)
@@ -332,7 +332,7 @@ void loadCurrentSketch()
     init(confWinMode);
     saveSetting();
     unoInfo();
-    sprintf(temp,"Sketch load ready: %s",confSketchFile);
+    sprintf(temp,"Sketch load ready to rumble: %s",confSketchFile);
     putMsg(msg_h-2,temp);
     g_currentSketchStatus = SO_LOADED;
   }
@@ -340,7 +340,7 @@ void loadCurrentSketch()
 }
 
 //====================================
-void openCommand()
+void openCommand(char *argv[])
 //====================================
 {
   struct stat st;
@@ -360,8 +360,8 @@ void openCommand()
 
       wmove(uno,board_h-2,1);
       wprintw(uno,"                                                  ");
-      if(g_silent==S_NO )mvwprintw(uno,board_h-2,1,"A%1d>",confWinMode);
-      if(g_silent==S_YES)mvwprintw(uno,board_h-2,1,"A%1d<",confWinMode);
+      if(g_silent==S_NO )mvwprintw(uno,board_h-2,1,"Z%1d>",confWinMode);
+      if(g_silent==S_YES)mvwprintw(uno,board_h-2,1,"Z%1d<",confWinMode);
 
       strcpy(command[0],"");
 
@@ -594,7 +594,7 @@ void openCommand()
 	}
       else if(projNo > 0 && projNo < 21)
         {
-	      selectProj(projNo,g_currentSketch);
+	      selectProj(projNo,g_currentSketch, argv);
 	      readConfig(g_currentSketch);
 	      g_warning = S_YES;
 	      g_currentSketchStatus = SO_SELECTED;
@@ -944,7 +944,7 @@ int main(int argc, char *argv[])
 
   readMsg(gplFile);
 
-  openCommand();
+  openCommand(argv);
   
   delwin(uno);
   delwin(ser);

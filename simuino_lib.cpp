@@ -81,6 +81,7 @@ int analyzeEvent(char *event)
 	    g_pinValue = value;
 	    if(strstr(event,"analog"))  g_pinType = ANA;
 	    if(strstr(event,"digital")) g_pinType = DIG;
+      printf("ANEV: %s", p);
     	return(g_pinType);
       } 
     return(0); 
@@ -873,7 +874,7 @@ void showScenario(char *fileName)
 }
 
 //====================================
-void selectProj(int projNo,char *projName)
+void selectProj(int projNo,char *projName, char **argv)
 //====================================
 {
   FILE *in;
@@ -1166,13 +1167,13 @@ void init(int mode)
       anaActRow[i] = ap-2;
     }
 
-  for(i=0;i<max_digPin;i++){wmove(uno,digIdRow[i],digIdCol[i]); wprintw(uno,"%2d",i);}
+  for(i=0;i<max_digPin;i++){wmove(uno,digIdRow[i],digIdCol[i]); wprintw(uno,"D%2d",i);}
   for(i=0;i<max_digPin;i++){wmove(uno,digPinRow[i],digPinCol[i]); waddch(uno,ACS_BULLET);}
   //for(i=0;i<max_digPin;i++){wmove(uno,digActRow[i],digActCol[i]); wprintw(uno,"a");}
   //for(i=0;i<max_digPin;i++){wmove(uno,digStatRow[i],digStatCol[i]);wprintw(uno,"s");}
   //for(i=0;i<max_digPin;i++){wmove(uno,digValRow[i],digValCol[i]);wprintw(uno,"v");}
 
-  for(i=0;i<max_anaPin;i++){wmove(uno,ap-1,anaPinCol[i]-1); wprintw(uno,"A%1d",i);}
+  for(i=0;i<max_anaPin;i++){wmove(uno,ap-1,anaPinCol[i]-1); wprintw(uno,"B%1d",i);}
   //for(i=0;i<max_anaPin;i++){wmove(uno,anaValRow[i],anaValCol[i]); waddch(uno,ACS_BULLET);}
   for(i=0;i<max_anaPin;i++){wmove(uno,anaPinRow[i],anaPinCol[i]); waddch(uno,ACS_BULLET);}
   //for(i=0;i<max_anaPin;i++){wmove(uno,anaActRow[i],anaActCol[i]); wprintw(uno,"x");}
@@ -1640,14 +1641,14 @@ int readStatus()
 	      sscanf(row,"%s%d",junk,&step);
 	      //printf("%d pinmod %s",step,p);
 	      //strcpy(data,p);
-	      pch = strtok(p,",");
+	      pch = strtok(p,":");
 	      pin = 0;
 	      while (pch != NULL)
 		{
 		  x_pinMode[pin][step] = atoi(pch);
 		  //printf("step=%d pin=%d value=%d\n",step,pin,x_pinMode[pin][step]);
 		  pin++;
-		  pch = strtok(NULL, ",");
+		  pch = strtok(NULL, ":");
 		}
 	    }
 	}
@@ -1671,16 +1672,17 @@ int readStatus()
 	      p = strstr(row," ? ");
 	      p = p+3;
 	      sscanf(row,"%s%d",junk,&step);
-	      //printf("%d pinmod %s",step,p);
+	      //printf("%d D: %s", step,p);
 	      //strcpy(data,p);
-	      pch = strtok(p,",");
+	      pch = strtok(p,":");
 	      pin = 0;
 	      while (pch != NULL)
 		{
 		  x_pinDigValue[pin][step] = atoi(pch);
+      //printf("Dig Pin: %d, %d: %d\n", pin, step, x_pinDigValue[pin][step]);
 		  //printf("DIGstep=%d pin=%d value=%d\n",step,pin,x_pinMode[pin][step]);
 		  pin++;
-		  pch = strtok(NULL, ",");
+		  pch = strtok(NULL, ":");
 		}
 	    }
 	}
@@ -1703,7 +1705,7 @@ int readStatus()
 	      p = strstr(row," ? ");
 	      p = p+3;
 	      sscanf(row,"%s%d",junk,&step);
-	      //printf("%d pinmod %s",step,p);
+	      //printf("%d A: %s", step, p);
 	      //strcpy(data,p);
 	      pch = strtok(p,",");
 	      pin = 0;
@@ -1735,7 +1737,7 @@ int readStatus()
 	      p = strstr(row," ? ");
 	      p = p+3;
 	      sscanf(row,"%s%d",junk,&step);
-	      //printf("%d pinmod %s",step,p);
+	      //printf("%s", p);
 	      //strcpy(data,p);
 	      pch = strtok(p,",");
 	      pin = 0;
