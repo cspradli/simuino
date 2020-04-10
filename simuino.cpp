@@ -930,17 +930,29 @@ int main(int argc, char *argv[])
   char call[200];
   //strcpy(path, getenv("HOME"));
   //printf("Test: %s", path);
-  std::string path = ros::package::getPath("arduino_link");
+ //Get path
+   std::string path = ros::package::getPath("arduino_link");
+   
    ros::Publisher sim_pub = n.advertise<std_msgs::String>("simuino_test", 1000);  
+   
    ros::Rate loop_rate(10);
+   
    std_msgs::String msge;    
+   
    std::stringstream ss;    
+   
    ss << "Test " << path;    
+   
    msge.data = ss.str();    
-   ROS_INFO("%s", msge.data.c_str());    
+   
+   //ROS_INFO("%s", msge.data.c_str());    
+   
    sim_pub.publish(msge);    
+   
    ros::spinOnce();
+   
    loop_rate.sleep();
+   
    //++count;  
    //int count = 0;
    sprintf(call, "cd %s; pwd;", path.c_str());
