@@ -27,9 +27,9 @@
 #include <sys/stat.h>
 #include <form.h>
 
-//#include "ros/ros.h"
-//#include "std_msgs/String.h"
-//#include "ros/package.h"
+#include "ros/ros.h"
+#include "std_msgs/String.h"
+#include "ros/package.h"
 
 #include "servuino/common.h"
 
@@ -723,6 +723,7 @@ void runMode(int stop)
     }
 
   putMsg(3,"Run Mode. Press h for help.");
+  printf("Run Mode. Press h for help\n");
 
   while(1)  
     {
@@ -730,12 +731,21 @@ void runMode(int stop)
 	   readFile(g_currentSketch,g_lineSketch[currentStep]);
 	   
       anyErrors();
-      if(g_silent==S_NO )mvwprintw(uno,board_h-2,1,"R%1d>",confWinMode);
-      if(g_silent==S_YES)mvwprintw(uno,board_h-2,1,"R%1d<",confWinMode);
-      unoInfo();
+      if(g_silent==S_NO ){
+		  mvwprintw(uno,board_h-2,1,"R%1d>",confWinMode);
+	  }
+	  if(g_silent==S_YES){
+		  mvwprintw(uno,board_h-2,1,"R%1d<",confWinMode);
+	  }
+	  unoInfo();
       
       ch = getchar();
-
+	  if (ch=='R') {
+	  	runLoop(S_FORWARD);
+	  } else if (ch=='q') {
+	  	return;
+	  }
+    /*
     if (ch=='q')
 	{
 	  return;
@@ -902,7 +912,7 @@ putMsg(2,syscom);
 	    }
 	  else
 	    putMsg(2,"Cancelled!");
-	} */
+	} *//*
     else if (ch=='v') 
 	{
           step = currentStep ;
@@ -943,7 +953,7 @@ putMsg(2,syscom);
 	{
 	  sprintf(temp,"Unknown command: %c",ch);
 	  putMsg(msg_h-2,temp);
-	}
+	}*/
     }
   return;
 }
@@ -951,54 +961,42 @@ putMsg(2,syscom);
 int main(int argc, char *argv[])
 //====================================
 {
+	int count = 0;
 
-  //ros::init(argc, argv, "simuino");  
-  //ros::NodeHandle n;
-  //char *path_n;
+	/**
+	 * Init ROS Node
+	 */
+	ros::init(argc, argv, "simuino");
+	ros::NodeHandle n;
+	
+	/**
+	 * Init publishers
+	 */
+	ros::Publisher sim_pub = n.advertise<std_msgs::String>("sim_chatter", 1000);
+	ros::Rate loop_rate(10);
+	
+	/**
+	 * Init msg types
+	 */
+	std_msgs::String msge;    
+	
+	
+	std::stringstream ss;    
+	ss << "hello world " << count;    
+	msge.data = ss.str();    
+	ROS_INFO("%s", msge.data.c_str());    
+	sim_pub.publish(msge);    
+	ros::spinOnce();
+	loop_rate.sleep();
+	++count;
   char call[200];
-  //strcpy(path, getenv("HOME"));
-  //printf("Test: %s", path);
- //Get path
-   //std::string path = ros::package::getPath("arduino_link");
-   
-   //ros::Publisher sim_pub = n.advertise<std_msgs::String>("simuino_test", 1000);  
-   
-   //ros::Rate loop_rate(10);
-   
-   //std_msgs::String msge;    
-   
-   //std::stringstream ss;    
-   
-   //ss << "Test " << path;    
-   
-   //msge.data = ss.str();    
-   
-   //ROS_INFO("%s", msge.data.c_str());    
-   
-   //sim_pub.publish(msge);    
-   
-   //ros::spinOnce();
-   
-   //loop_rate.sleep();
-   
-   //++count;  
-   //int count = 0;
- //  sprintf(call, "cd %s; pwd;", path.c_str());
- // system(call);
-//  strcat(path_n, path.c_str());
- // strcat(path_n, "/src/simuino/");
-
-  if(chdir("src/arduino_link/src/simuino") != 0){
-	  perror("chdir failed to get");
-  }
-  system("ls -l");
   char syscom[120];
   int ch,i,x;
 
   currentStep = 1;
   currentLoop = 0;
 
-
+  system("ls -l");
 
   strcpy(gplFile,"gpl.txt");
 
