@@ -931,37 +931,37 @@ int main(int argc, char *argv[])
   //strcpy(path, getenv("HOME"));
   //printf("Test: %s", path);
  //Get path
-   std::string path = ros::package::getPath("arduino_link");
+   //std::string path = ros::package::getPath("arduino_link");
    
-   ros::Publisher sim_pub = n.advertise<std_msgs::String>("simuino_test", 1000);  
+   //ros::Publisher sim_pub = n.advertise<std_msgs::String>("simuino_test", 1000);  
    
-   ros::Rate loop_rate(10);
+   //ros::Rate loop_rate(10);
    
-   std_msgs::String msge;    
+   //std_msgs::String msge;    
    
-   std::stringstream ss;    
+   //std::stringstream ss;    
    
-   ss << "Test " << path;    
+   //ss << "Test " << path;    
    
-   msge.data = ss.str();    
+   //msge.data = ss.str();    
    
    //ROS_INFO("%s", msge.data.c_str());    
    
-   sim_pub.publish(msge);    
+   //sim_pub.publish(msge);    
    
-   ros::spinOnce();
+   //ros::spinOnce();
    
-   loop_rate.sleep();
+   //loop_rate.sleep();
    
    //++count;  
    //int count = 0;
-   sprintf(call, "cd %s; pwd;", path.c_str());
-  system(call);
-  strcat(path_n, path.c_str());
-  strcat(path_n, "/src/simuino/");
-  if(chdir(path_n) != 0){
-	  perror("chdir failed to get to %s\n", path_n);
-  }
+ //  sprintf(call, "cd %s; pwd;", path.c_str());
+ // system(call);
+//  strcat(path_n, path.c_str());
+ // strcat(path_n, "/src/simuino/");
+ // if(chdir(path_n) != 0){
+//	  perror("chdir failed to get to %s\n", path_n);
+ // }
   char syscom[120];
   int ch,i,x;
 
