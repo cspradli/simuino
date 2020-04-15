@@ -957,6 +957,18 @@ putMsg(2,syscom);
     }
   return;
 }
+void serial_back(const std_msgs::String::ConstPtr& msg){
+	ROS_INFO("I heard: [%s]", msg->data.c_str());
+}
+void servo_back(const std_msgs::String::ConstPtr& msg){
+	ROS_INFO("I heard: [%s]", msg->data.c_str());
+}
+void analog_back(const std_msgs::String::ConstPtr& msg){
+	ROS_INFO("I heard: [%s]", msg->data.c_str());
+}
+void digital_back(const std_msgs::String::ConstPtr& msg){
+	ROS_INFO("I heard: [%s]", msg->data.c_str());
+}
 //====================================
 int main(int argc, char *argv[])
 //====================================
@@ -972,21 +984,32 @@ int main(int argc, char *argv[])
 	/**
 	 * Init publishers
 	 */
-	ros::Publisher sim_pub = n.advertise<std_msgs::String>("sim_chatter", 1000);
-	ros::Rate loop_rate(10);
+	ros::Publisher serial_pub = n.advertise<std_msgs::String>("serialOut", 1000);
+	ros::Publisher servo_pub = n.advertise<std_msgs::String>("servoOut", 1000);
+	ros::Publisher analog_pub = n.advertise<std_msgs::String>("analogPinsOut", 1000);
+	ros::Publisher digital_pub = n.advertise<std_msgs::String>("digitalPinsOut", 1000);
+	
+	/**
+	 * Init subscribers
+	 */
+	ros::Subscriber serial_sub = n.subscribe("serialOut", 1000, serial_back);
+	ros::Subscriber servo_sub = n.subscribe("servoOut", 1000, servo_back);
+	ros::Subscriber analog_sub = n.subscribe("serialOut", 1000, analog_back);
+	ros::Subscriber digital_sub = n.subscribe("serialOut", 1000, digital_back);
 	
 	/**
 	 * Init msg types
 	 */
 	std_msgs::String msge;    
 	
-	
+	ros::Rate loop_rate(10);
 	std::stringstream ss;    
 	ss << "hello world " << count;    
 	msge.data = ss.str();    
 	ROS_INFO("%s", msge.data.c_str());    
-	sim_pub.publish(msge);    
+	serial_pub.publish(msge);    
 	ros::spinOnce();
+	//ros::spin();
 	loop_rate.sleep();
 	++count;
   char call[200];
