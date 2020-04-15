@@ -55,13 +55,13 @@ int led = 13;
 // the setup routine runs once when you press reset:
 void setup() {                
   // initialize the digital pin as an output.
-  pinMode(led, OUTPUT);     
+  pinModeX(58,led, OUTPUT);     
 }
 
 // the loop routine runs over and over again forever:
 void loop() {
-  digitalWrite(led, HIGH);   // turn the LED on (HIGH is the voltage level)
-  delay(1000);               // wait for a second
-  digitalWrite(led, LOW);    // turn the LED off by making the voltage LOW
-  delay(1000);               // wait for a second
+  digitalWriteX(63,led, HIGH);   // turn the LED on (HIGH is the voltage level)
+  delayX(64,1000);               // wait for a second
+  digitalWriteX(65,led, LOW);    // turn the LED off by making the voltage LOW
+  delayX(66,1000);               // wait for a second
 }

@@ -1503,8 +1503,8 @@ void anyErrors()
   char syscom[500];
   
   g_existError = S_NO;
-  x = system("rm ~/catkin_ws/src/arduino_link/src/simuino/temp.txt");
-  sprintf(syscom,"cat ~/catkin_ws/src/arduino_link/src/simuino/%s ~/catkin_ws/src/arduino_link/src/simuino/%s ~/catkin_ws/src/arduino_link/src/simuino/%s> ~/catkin_ws/src/arduino_link/src/simuino/%s",fileError,fileServError,fileCopyError,fileTemp);
+  x = system("rm temp.txt");
+  sprintf(syscom,"cat %s %s %s> %s",fileError,fileServError,fileCopyError,fileTemp);
   x = system(syscom); 
   x = countRowsInFile(fileTemp);
   if(x > 0 && x != 999)
@@ -1524,7 +1524,7 @@ int loadSketch(char sketch[])
   int x,ch,res;
   char syscom[520];
 
-  sprintf(syscom,"cp ~/catkin_ws/src/arduino_link/src/simuino/%s ~/catkin_ws/src/arduino_link/src/simuino/%s > ~/catkin_ws/src/arduino_link/src/simuino/%s 2>&1;",sketch,fileServSketch,fileCopyError);
+  sprintf(syscom,"cp %s %s > %s 2>&1;",sketch,fileServSketch,fileCopyError);
   x=system(syscom);
   //strcpy(confSketchFile,sketch);
   char temp[200];
@@ -1535,9 +1535,9 @@ int loadSketch(char sketch[])
   strcat(temp2, sketch);
   //printf("Load 1: %s", temp);
   //printf("Load 2: %s", temp2);
-  instrument(temp2,temp);
+  instrument(sketch,fileServSketch);
 
-  sprintf(syscom,"cd ~/catkin_ws/src/arduino_link/src/simuino/servuino; g++ -O2 -o servuino servuino.cpp > g++.result 2>&1;");
+  sprintf(syscom,"cd ../../src/arduino_link/src/simuino/servuino; g++ -O2 -o servuino servuino.cpp > g++.result 2>&1;");
   x=system(syscom);
 
   x=countRowsInFile(fileServComp);
@@ -1545,12 +1545,14 @@ int loadSketch(char sketch[])
     {
       readMsg(fileServComp);
       wmove(msg,msg_h-2,1);
-      wprintw(msg,"press any key to continue >>");
+      wprintw(msg,"Oh no: press any key to continue >>");
       wrefresh(msg);
       ch = getchar();
       putMsg(2,"ERROR: Check your sketch or report an issue to Simuino");
       return(1);
     }
+  wprintw(msg,"Oh no: press any key to continue >>");
+  wrefresh(msg);
   readSketchInfo();
   return(0);
 }

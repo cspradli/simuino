@@ -1,4 +1,4 @@
-/home/cspradli/catkin_ws/src/arduino_link/src/simuino/sketchbook/blink.ino
-/home/cspradli/catkin_ws/src/arduino_link/src/simuino/sketchbook/helloWorld_MEGA.ino
-/home/cspradli/catkin_ws/src/arduino_link/src/simuino/sketchbook/helloWorld_UNO.ino
-/home/cspradli/catkin_ws/src/arduino_link/src/simuino/sketchbook/test1.ino
+sketchbook/blink.ino
+sketchbook/helloWorld_MEGA.ino
+sketchbook/helloWorld_UNO.ino
+sketchbook/test1.ino
