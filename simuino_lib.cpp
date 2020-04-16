@@ -135,6 +135,10 @@ void show(WINDOW *win)
       wmove(win,0,2);
       wprintw(win,"----------Messages(Test 1)----------");
     }
+  if(win == rsw){
+    wmove(win,0,2);
+    wprintw(win, "----------ROS----------");
+  }
   
   wmove(uno,board_h-2,4);
   wprintw(uno,"                  ");
@@ -142,7 +146,15 @@ void show(WINDOW *win)
   wrefresh(uno);
   wrefresh(win);
 }
-
+//====================================
+void putRsw(int line,const char *message)
+//====================================
+{
+  wmove(rsw,line,1);
+  wprintw(rsw,message);
+  show(rsw);
+  return;
+}
 //====================================
 void putMsg(int line,const char *message)
 //====================================
@@ -251,7 +263,30 @@ void winLog()
     }
   show(slog);
 }
+//====================================
+void winRsw()
+//====================================
+{
+  int i,k;
+  char filler[120];
 
+  wmove(rsw,1,1);
+  //fill(log_w-strlen(simulation[currentStep+1]),filler,' ');
+  wprintw(slog,"Ros>%s%s",simulation[currentStep+1],filler);
+  for(i=1;i<log_h-2;i++)
+    {
+      wmove(rsw,i+1,1);
+      k = currentStep - i+1;
+      if(k>0)
+	{
+	  fill(log_w-strlen(simulation[k]),filler,' ');
+	  wprintw(rsw,"[%d,%d] %s%s",k,stepLoop[k],simulation[k],filler);
+	}
+      else
+	wprintw(rsw,"%s",logBlankRow);
+    }
+  show(rsw);
+}
 //====================================
 void winSer()
 //====================================
@@ -1051,6 +1086,7 @@ void init(int mode)
   delwin(ser);
   delwin(slog);
   delwin(msg);
+  delwin(rsw);
 
   // Up
   initscr();
@@ -1200,6 +1236,11 @@ void init(int mode)
       ser_w = s_col - board_w - log_w;
       ser_x = 0;
       ser_y = board_w+log_w;
+
+      ros_h = msg_h/2;
+      ros_w = board_w;
+      ros_x = board_h;
+      ros_y = 0;
     }
 
   if(mode == 1) // 50 on 50
@@ -1218,6 +1259,11 @@ void init(int mode)
       ser_w = s_col-board_w;
       ser_x = s_row/2;
       ser_y = board_w;
+
+      ros_h = msg_h/2;
+      ros_w = board_w;
+      ros_x = board_h;
+      ros_y = 0;
     }
 
   if(mode == 2) // 90 on 10
@@ -1236,6 +1282,11 @@ void init(int mode)
       ser_w = s_col-board_w;
       ser_x = log_h;
       ser_y = board_w;
+
+      ros_h = msg_h/2;
+      ros_w = board_w;
+      ros_x = board_h;
+      ros_y = 0;
     }
 
   if(mode == 3) // 10 on 90
@@ -1254,6 +1305,11 @@ void init(int mode)
       ser_w = s_col-board_w;
       ser_x = log_h;
       ser_y = board_w;
+
+      ros_h = msg_h/2;
+      ros_w = board_w;
+      ros_x = board_h;
+      ros_y = 0;
     }
 
   if(mode == 4) // big message to the right. Log on Ser
@@ -1272,6 +1328,11 @@ void init(int mode)
       ser_w = board_w;
       ser_x = log_h+board_h;
       ser_y = 0;
+
+      ros_h = msg_h/2;
+      ros_w = board_w;
+      ros_x = board_h;
+      ros_y = 0;
     }
 
   if(mode == 5) // big message to the right. Log and Ser side by side
@@ -1290,9 +1351,14 @@ void init(int mode)
       ser_w = board_w/2;
       ser_x = board_h;
       ser_y = log_w;
+
+      ros_h = msg_h/2;
+      ros_w = board_w;
+      ros_x = board_h;
+      ros_y = 0;
     }
 
-  msg=newwin(msg_h,msg_w,msg_x,msg_y);
+  msg=newwin(ser_h,ser_w,ser_x,ser_y);
   scrollok(msg,true);
   wbkgd(msg,COLOR_PAIR(MSG_COLOR));
   show(msg);
@@ -1306,7 +1372,11 @@ void init(int mode)
   scrollok(ser,true);
   wbkgd(ser,COLOR_PAIR(SER_COLOR));
   show(ser);
-
+  
+  rsw = newwin(msg_h, msg_w, msg_x, msg_y);
+  scrollok(rsw, true);
+  wbkgd(ser, COLOR_PAIR(LOG_COLOR));
+  show(rsw);
   for(i=0;i<log_w;i++)logBlankRow[i] = ' ';logBlankRow[i]='\0';
   for(i=0;i<ser_w;i++)serBlankRow[i] = ' ';serBlankRow[i]='\0';
 

@@ -27,9 +27,7 @@
 #include <sys/stat.h>
 #include <form.h>
 
-#include "ros/ros.h"
-#include "std_msgs/String.h"
-#include "ros/package.h"
+
 
 #include "servuino/common.h"
 
@@ -175,7 +173,7 @@ int   scenInterrupt = 0;
 
 // Configuration default values
 int   confSteps   = 1000;
-int   confWinMode =    2;
+int   confWinMode =    1;
 int   confLogLev  =    1;
 int   confLogFile =    0;
 char  confSketchFile[200];
@@ -274,6 +272,7 @@ int  g_row_loop = 0;
 
 int uno_h=0, uno_w=0, uno_x=0, uno_y=0;
 int msg_h=0, msg_w=0, msg_x=0, msg_y=0;
+int ros_h=0, ros_w=0, ros_x=0, ros_y=0;
 int log_h=0, log_w=0, log_x=0, log_y=0;
 int ser_h=0, ser_w=0, ser_x=0, ser_y=0;
 int board_w=0,board_h=0,board_x=0,board_y=0;
@@ -286,13 +285,44 @@ int ap,dp;
 #define SR 20
 
 
-WINDOW *uno,*ser,*slog,*msg;
+WINDOW *uno,*ser,*slog,*msg, *rsw;
 static struct termios orig, nnew;
  
 //char  stemp[80];
 char  gplFile[80];
 
 FILE  *err;
+
+
+#include "ros/ros.h"
+#include "std_msgs/String.h"
+#include "ros/package.h"
+
+/**
+ * Prototypes for all callbacks
+ */
+void serial_back(const std_msgs::String::ConstPtr& msg);
+void servo_back(const std_msgs::String::ConstPtr& msg);
+void analog_back(const std_msgs::String::ConstPtr& msg);
+void digital_back(const std_msgs::String::ConstPtr& msg);
+
+
+/**
+ * Make publishers and subscribers global
+ **/
+ros::Publisher serial_pub;
+ros::Publisher servo_pub;
+ros::Publisher analog_pub;
+ros::Publisher digital_pub;
+
+ros::Subscriber serial_sub;
+ros::Subscriber servo_sub;
+ros::Subscriber analog_sub;
+ros::Subscriber digital_sub;
+
+
+
+int count;
 
 #include "servuino/common_lib.cpp"
 #include "servuino/arduino.h"
@@ -345,6 +375,7 @@ int goStep(int step)
   currentLoop = stepLoop[currentStep];
   winLog();
   winSer();
+
   //strcpy(stemp,status[currentStep]);
   displayStatus();
   unoInfo();
@@ -413,9 +444,21 @@ void openCommand(char *argv[])
   g_silent = 0;
 
   readMsg(gplFile);
+  ros::Rate loop_rate(10);
 
   while(strstr(str,"ex") == NULL)
     {
+	  	std_msgs::String msge; 
+		std::stringstream ss; 
+		ss << "hello world " << count;    
+		msge.data = ss.str();    
+		//ROS_INFO("%s", msge.data.c_str());
+		const char *mes = msge.data.c_str();
+		putRsw(2,mes);    
+		serial_pub.publish(msge);
+		ros::spinOnce();  
+		loop_rate.sleep();
+		++count;  
       anyErrors();
       unoInfo();
 
@@ -958,60 +1001,69 @@ putMsg(2,syscom);
   return;
 }
 void serial_back(const std_msgs::String::ConstPtr& msg){
-	ROS_INFO("I heard: [%s]", msg->data.c_str());
+	//ROS_INFO("I heard: [%s]", msg->data.c_str());
+	const char *catstr = " -- HEARD ";
+	const char *mes = msg->data.c_str();
+	putRsw(4,mes);
+	putRsw(5, catstr);  
 }
 void servo_back(const std_msgs::String::ConstPtr& msg){
-	ROS_INFO("I heard: [%s]", msg->data.c_str());
+	const char *catstr = " -- HEARD ";
+	const char *mes = msg->data.c_str();
+	putRsw(4,mes);
+	putRsw(5, catstr);  
 }
 void analog_back(const std_msgs::String::ConstPtr& msg){
-	ROS_INFO("I heard: [%s]", msg->data.c_str());
+	const char *catstr = " -- HEARD ";
+	const char *mes = msg->data.c_str();
+	putRsw(4,mes);
+	putRsw(5, catstr);  
 }
 void digital_back(const std_msgs::String::ConstPtr& msg){
-	ROS_INFO("I heard: [%s]", msg->data.c_str());
+	const char *catstr = " -- HEARD ";
+	const char *mes = msg->data.c_str();
+	putRsw(4,mes);
+	putRsw(5, catstr);  
 }
 //====================================
 int main(int argc, char *argv[])
 //====================================
 {
-	int count = 0;
+	count = 0;
 
-	/**
-	 * Init ROS Node
-	 */
-	ros::init(argc, argv, "simuino");
-	ros::NodeHandle n;
+
 	
 	/**
 	 * Init publishers
 	 */
-	ros::Publisher serial_pub = n.advertise<std_msgs::String>("serialOut", 1000);
-	ros::Publisher servo_pub = n.advertise<std_msgs::String>("servoOut", 1000);
-	ros::Publisher analog_pub = n.advertise<std_msgs::String>("analogPinsOut", 1000);
-	ros::Publisher digital_pub = n.advertise<std_msgs::String>("digitalPinsOut", 1000);
+	ros::init(argc, argv, "simuino");
+	ros::NodeHandle n;
+
+	serial_pub = n.advertise<std_msgs::String>("serialOut", 1000);
+	servo_pub = n.advertise<std_msgs::String>("servoOut", 1000);
+	analog_pub = n.advertise<std_msgs::String>("analogPinsOut", 1000);
+	digital_pub = n.advertise<std_msgs::String>("digitalPinsOut", 1000);
 	
 	/**
 	 * Init subscribers
 	 */
-	ros::Subscriber serial_sub = n.subscribe("serialOut", 1000, serial_back);
-	ros::Subscriber servo_sub = n.subscribe("servoOut", 1000, servo_back);
-	ros::Subscriber analog_sub = n.subscribe("serialOut", 1000, analog_back);
-	ros::Subscriber digital_sub = n.subscribe("serialOut", 1000, digital_back);
+	serial_sub = n.subscribe("serialOut", 1000, serial_back);
+	servo_sub = n.subscribe("servoOut", 1000, servo_back);
+	analog_sub = n.subscribe("serialOut", 1000, analog_back);
+	digital_sub = n.subscribe("serialOut", 1000, digital_back);
+
 	
 	/**
 	 * Init msg types
 	 */
-	std_msgs::String msge;    
-	
-	ros::Rate loop_rate(10);
-	std::stringstream ss;    
-	ss << "hello world " << count;    
-	msge.data = ss.str();    
-	ROS_INFO("%s", msge.data.c_str());    
-	serial_pub.publish(msge);    
-	ros::spinOnce();
+   
+
+
 	//ros::spin();
-	loop_rate.sleep();
-	++count;
+
+
+
+
   char call[200];
   char syscom[120];
   int ch,i,x;
@@ -1072,7 +1124,9 @@ int main(int argc, char *argv[])
   delwin(uno);
   delwin(ser);
   delwin(slog);
+  delwin(rsw);
   delwin(msg);
+
   endwin();
 
   fclose(err);
