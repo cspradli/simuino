@@ -2062,7 +2062,9 @@ void displayStatus()
    * Put ros msg here to spin out after change in pins
    **/
 
-  putRsw(2, "Published vector");
+  putRsw(2, "Published digital_pin vector");
+  
+  //putRsw(3, "Published analog_pin vector");
   digital_pub.publish(dig_Ros);
   ros::spinOnce();
   loop_rate.sleep();
