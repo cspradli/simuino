@@ -347,6 +347,7 @@ int runStep(int dir)
     }
   currentLoop = stepLoop[currentStep];
   winLog();
+  winRsw();
   winSer();
   //strcpy(stemp,status[currentStep]);
   displayStatus();
@@ -767,9 +768,20 @@ void runMode(int stop)
 
   putMsg(3,"Run Mode. Press h for help.");
   printf("Run Mode. Press h for help\n");
-
+  ros::Rate loop_rate(10);
   while(1)  
     {
+		std_msgs::String msge; 
+		std::stringstream ss; 
+		ss << "hello world " << count;    
+		msge.data = ss.str();    
+		//ROS_INFO("%s", msge.data.c_str());
+		const char *mes = msge.data.c_str();
+		putRsw(2,mes);    
+		serial_pub.publish(msge);
+		ros::spinOnce();  
+		loop_rate.sleep();
+		++count;  
       if(g_debug == 1) 
 	   readFile(g_currentSketch,g_lineSketch[currentStep]);
 	   
@@ -783,7 +795,7 @@ void runMode(int stop)
 	  unoInfo();
       
       ch = getchar();
-	  if (ch=='R') {
+	  if (ch=='R'  || ch=='r') {
 	  	runLoop(S_FORWARD);
 	  } else if (ch=='q') {
 	  	return;
@@ -1002,28 +1014,28 @@ putMsg(2,syscom);
 }
 void serial_back(const std_msgs::String::ConstPtr& msg){
 	//ROS_INFO("I heard: [%s]", msg->data.c_str());
-	const char *catstr = " -- HEARD ";
+	const char *catstr = " -- HEARD --";
 	const char *mes = msg->data.c_str();
-	putRsw(4,mes);
-	putRsw(5, catstr);  
+	putRsw(5,mes);
+	putRsw(4, catstr);  
 }
 void servo_back(const std_msgs::String::ConstPtr& msg){
-	const char *catstr = " -- HEARD ";
+	const char *catstr = " -- HEARD --";
 	const char *mes = msg->data.c_str();
-	putRsw(4,mes);
-	putRsw(5, catstr);  
+	putRsw(5,mes);
+	putRsw(4, catstr);  
 }
 void analog_back(const std_msgs::String::ConstPtr& msg){
-	const char *catstr = " -- HEARD ";
+	const char *catstr = " -- HEARD --";
 	const char *mes = msg->data.c_str();
-	putRsw(4,mes);
-	putRsw(5, catstr);  
+	putRsw(5,mes);
+	putRsw(4, catstr);  
 }
 void digital_back(const std_msgs::String::ConstPtr& msg){
-	const char *catstr = " -- HEARD ";
+	const char *catstr = " -- HEARD -- ";
 	const char *mes = msg->data.c_str();
-	putRsw(4,mes);
-	putRsw(5, catstr);  
+	putRsw(5,mes);
+	putRsw(4, catstr);  
 }
 //====================================
 int main(int argc, char *argv[])
