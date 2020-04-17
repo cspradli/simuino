@@ -27,9 +27,11 @@
 #include <sys/stat.h>
 #include <form.h>
 
+
+
 #include "servuino/common.h"
 
-
+#define CONST_FILE 280
 // Simulator status
 int x_pinMode[MAX_TOTAL_PINS][SCEN_MAX];
 int x_pinScenario[MAX_TOTAL_PINS][SCEN_MAX];
@@ -72,7 +74,7 @@ char currentConf[SIZE_ROW];
 int  currentPin  = 0;
 int  currentValueD[MAX_PIN_DIGITAL_MEGA];
 int  currentValueA[MAX_PIN_ANALOG_MEGA];
-char g_currentSketch[80];
+char g_currentSketch[180];
 int  g_currentSketchStatus = SO_VOID;
 int  g_runDelay = 0; //millisec
 
@@ -171,7 +173,7 @@ int   scenInterrupt = 0;
 
 // Configuration default values
 int   confSteps   = 1000;
-int   confWinMode =    2;
+int   confWinMode =    1;
 int   confLogLev  =    1;
 int   confLogFile =    0;
 char  confSketchFile[200];
@@ -205,6 +207,63 @@ char  fileServPinrw[80]    = "servuino/serv.pinrw";
 char  fileServSerial[80]   = "servuino/serv.serial";
 char  fileServTime[80]     = "servuino/serv.time";
 
+/*
+char  fileTemp[280]         = "../../src/arduino_link/src/simuino/temp.txt";
+char  fileInfoRun[280]      = "../../src/arduino_link/src/simuino/help.txt";
+char  fileCopyError[280]    = "../../src/arduino_link/src/simuino/copy.error";
+char  fileHints[280]        = "../../src/arduino_link/src/simuino/hints.txt";
+char  fileInfoAdmin[280]    = "../../src/arduino_link/src/simuino/help_command.txt";
+char  fileInfoGpl[280]      = "../../src/arduino_link/src/simuino/gpl.txt";
+char  fileProjList[280]     = "../../src/arduino_link/src/simuino/conf_list.txt";
+char  fileLog[280]          = "../../src/arduino_link/src/simuino/log.txt";
+char  fileDefault[280]      = "../../src/arduino_link/src/simuino/default.conf";
+char  fileError[280]        = "../../src/arduino_link/src/simuino/error.txt";
+char  fileServComp[280]     = "../../src/arduino_link/src/simuino/servuino/g++.result";
+char  fileServSketch[280]   = "../../src/arduino_link/src/simuino/servuino/sketch.ino";
+char  fileServArduino[280]  = "../../src/arduino_link/src/simuino/servuino/serv.event";
+char  fileServError[280]    = "../../src/arduino_link/src/simuino/servuino/serv.error";
+char  fileServScen[280]     = "../../src/arduino_link/src/simuino/servuino/data.scen";
+char  fileServScenario[280] = "../../src/arduino_link/src/simuino/servuino/data.scenario";
+char  fileServCode[280]     = "../../src/arduino_link/src/simuino/servuino/data.code";
+char  fileServCustom[280]   = "../../src/arduino_link/src/simuino/servuino/serv.cust";
+
+char  fileServInoDebug[280] = "../../src/arduino_link/src/simuino/servuino/ino.debug";
+
+char  fileServPinmod[280]   = "../../src/arduino_link/src/simuino/servuino/serv.pinmod";
+char  fileServDigval[280]   = "../../src/arduino_link/src/simuino/servuino/serv.digval";
+char  fileServAnaval[280]   = "../../src/arduino_link/src/simuino/servuino/serv.anaval";
+char  fileServPinrw[280]    = "../../src/arduino_link/src/simuino/servuino/serv.pinrw";
+char  fileServSerial[280]   = "../../src/arduino_link/src/simuino/servuino/serv.serial";
+char  fileServTime[280]     = "../../src/arduino_link/src/simuino/servuino/serv.time";
+
+char  fileTemp[280]         = "../../src/arduino_link/src/simuino/temp.txt";
+char  fileInfoRun[280]      = "../../src/arduino_link/src/simuino/help.txt";
+char  fileCopyError[280]    = "../../src/arduino_link/src/simuino/copy.error";
+char  fileHints[280]        = "../../src/arduino_link/src/simuino/hints.txt";
+char  fileInfoAdmin[280]    = "../../src/arduino_link/src/simuino/help_command.txt";
+char  fileInfoGpl[280]      = "../../src/arduino_link/src/simuino/gpl.txt";
+char  fileProjList[280]     = "../../src/arduino_link/src/simuino/conf_list.txt";
+char  fileLog[280]          = "../../src/arduino_link/src/simuino/log.txt";
+char  fileDefault[280]      = "../../src/arduino_link/src/simuino/default.conf";
+char  fileError[280]        = "../../src/arduino_link/src/simuino/error.txt";
+char  fileServComp[280]     = "../../src/arduino_link/src/simuino/servuino/g++.result";
+char  fileServSketch[280]   = "../../src/arduino_link/src/simuino/servuino/sketch.ino";
+char  fileServArduino[280]  = "../../src/arduino_link/src/simuino/servuino/serv.event";
+char  fileServError[280]    = "../../src/arduino_link/src/simuino/servuino/serv.error";
+char  fileServScen[280]     = "../../src/arduino_link/src/simuino/servuino/data.scen";
+char  fileServScenario[280] = "../../src/arduino_link/src/simuino/servuino/data.scenario";
+char  fileServCode[280]     = "../../src/arduino_link/src/simuino/servuino/data.code";
+char  fileServCustom[280]   = "../../src/arduino_link/src/simuino/servuino/serv.cust";
+
+char  fileServInoDebug[280] = "../../src/arduino_link/src/simuino/servuino/ino.debug";
+
+char  fileServPinmod[280]   = "../../src/arduino_link/src/simuino/servuino/serv.pinmod";
+char  fileServDigval[280]   = "../../src/arduino_link/src/simuino/servuino/serv.digval";
+char  fileServAnaval[280]   = "../../src/arduino_link/src/simuino/servuino/serv.anaval";
+char  fileServPinrw[280]    = "../../src/arduino_link/src/simuino/servuino/serv.pinrw";
+char  fileServSerial[280]   = "../../src/arduino_link/src/simuino/servuino/serv.serial";
+char  fileServTime[280]     = "../../src/arduino_link/src/simuino/servuino/serv.time";
+*/
 int  g_nScenDigital = 0;
 int  g_nScenAnalog  = 0;
 
@@ -213,6 +272,7 @@ int  g_row_loop = 0;
 
 int uno_h=0, uno_w=0, uno_x=0, uno_y=0;
 int msg_h=0, msg_w=0, msg_x=0, msg_y=0;
+int ros_h=0, ros_w=0, ros_x=0, ros_y=0;
 int log_h=0, log_w=0, log_x=0, log_y=0;
 int ser_h=0, ser_w=0, ser_x=0, ser_y=0;
 int board_w=0,board_h=0,board_x=0,board_y=0;
@@ -225,7 +285,7 @@ int ap,dp;
 #define SR 20
 
 
-WINDOW *uno,*ser,*slog,*msg;
+WINDOW *uno,*ser,*slog,*msg, *rsw;
 static struct termios orig, nnew;
  
 //char  stemp[80];
@@ -233,10 +293,41 @@ char  gplFile[80];
 
 FILE  *err;
 
-#include "servuino/common_lib.c"
+
+#include "ros/ros.h"
+#include "std_msgs/String.h"
+#include "ros/package.h"
+
+/**
+ * Prototypes for all callbacks
+ */
+void serial_back(const std_msgs::String::ConstPtr& msg);
+void servo_back(const std_msgs::String::ConstPtr& msg);
+void analog_back(const std_msgs::String::ConstPtr& msg);
+void digital_back(const std_msgs::String::ConstPtr& msg);
+
+
+/**
+ * Make publishers and subscribers global
+ **/
+ros::Publisher serial_pub;
+ros::Publisher servo_pub;
+ros::Publisher analog_pub;
+ros::Publisher digital_pub;
+
+ros::Subscriber serial_sub;
+ros::Subscriber servo_sub;
+ros::Subscriber analog_sub;
+ros::Subscriber digital_sub;
+
+
+
+int count;
+
+#include "servuino/common_lib.cpp"
 #include "servuino/arduino.h"
 #include "simuino.h"
-#include "simuino_lib.c"
+#include "simuino_lib.cpp"
 
 //====================================
 int runStep(int dir)
@@ -256,6 +347,7 @@ int runStep(int dir)
     }
   currentLoop = stepLoop[currentStep];
   winLog();
+  winRsw();
   winSer();
   //strcpy(stemp,status[currentStep]);
   displayStatus();
@@ -284,6 +376,7 @@ int goStep(int step)
   currentLoop = stepLoop[currentStep];
   winLog();
   winSer();
+
   //strcpy(stemp,status[currentStep]);
   displayStatus();
   unoInfo();
@@ -332,7 +425,7 @@ void loadCurrentSketch()
     init(confWinMode);
     saveSetting();
     unoInfo();
-    sprintf(temp,"Sketch load ready: %s",confSketchFile);
+    sprintf(temp,"Sketch load ready to rumble: %s",confSketchFile);
     putMsg(msg_h-2,temp);
     g_currentSketchStatus = SO_LOADED;
   }
@@ -340,28 +433,40 @@ void loadCurrentSketch()
 }
 
 //====================================
-void openCommand()
+void openCommand(char *argv[])
 //====================================
 {
   struct stat st;
   int ch,nsteps=1000,x,i,n,stop=0,loop,projNo = 0,ok=0,tmp;
-  char *p,str[120],sstr[20],fileName[120],temp[120],syscom[120];
+  char *p,str[120],sstr[20],fileName[120],temp[120],syscom[200];
   char command[40][40];
 
   s_mode = S_ADMIN;
   g_silent = 0;
 
   readMsg(gplFile);
+  ros::Rate loop_rate(10);
 
   while(strstr(str,"ex") == NULL)
     {
+	  	std_msgs::String msge; 
+		std::stringstream ss; 
+		ss << "hello world " << count;    
+		msge.data = ss.str();    
+		//ROS_INFO("%s", msge.data.c_str());
+		const char *mes = msge.data.c_str();
+		putRsw(2,mes);    
+		serial_pub.publish(msge);
+		ros::spinOnce();  
+		loop_rate.sleep();
+		++count;  
       anyErrors();
       unoInfo();
 
       wmove(uno,board_h-2,1);
       wprintw(uno,"                                                  ");
-      if(g_silent==S_NO )mvwprintw(uno,board_h-2,1,"A%1d>",confWinMode);
-      if(g_silent==S_YES)mvwprintw(uno,board_h-2,1,"A%1d<",confWinMode);
+      if(g_silent==S_NO )mvwprintw(uno,board_h-2,1,"C%1d>",confWinMode);
+      if(g_silent==S_YES)mvwprintw(uno,board_h-2,1,"C%1d<",confWinMode);
 
       strcpy(command[0],"");
 
@@ -594,7 +699,7 @@ void openCommand()
 	}
       else if(projNo > 0 && projNo < 21)
         {
-	      selectProj(projNo,g_currentSketch);
+	      selectProj(projNo,g_currentSketch, argv);
 	      readConfig(g_currentSketch);
 	      g_warning = S_YES;
 	      g_currentSketchStatus = SO_SELECTED;
@@ -662,19 +767,40 @@ void runMode(int stop)
     }
 
   putMsg(3,"Run Mode. Press h for help.");
-
+  printf("Run Mode. Press h for help\n");
+  ros::Rate loop_rate(10);
   while(1)  
     {
+		std_msgs::String msge; 
+		std::stringstream ss; 
+		ss << "hello world " << count;    
+		msge.data = ss.str();    
+		//ROS_INFO("%s", msge.data.c_str());
+		const char *mes = msge.data.c_str();
+		putRsw(2,mes);    
+		serial_pub.publish(msge);
+		ros::spinOnce();  
+		loop_rate.sleep();
+		++count;  
       if(g_debug == 1) 
 	   readFile(g_currentSketch,g_lineSketch[currentStep]);
 	   
       anyErrors();
-      if(g_silent==S_NO )mvwprintw(uno,board_h-2,1,"R%1d>",confWinMode);
-      if(g_silent==S_YES)mvwprintw(uno,board_h-2,1,"R%1d<",confWinMode);
-      unoInfo();
+      if(g_silent==S_NO ){
+		  mvwprintw(uno,board_h-2,1,"R%1d>",confWinMode);
+	  }
+	  if(g_silent==S_YES){
+		  mvwprintw(uno,board_h-2,1,"R%1d<",confWinMode);
+	  }
+	  unoInfo();
       
       ch = getchar();
-
+	  if (ch=='R'  || ch=='r') {
+	  	runLoop(S_FORWARD);
+	  } else if (ch=='q') {
+	  	return;
+	  }
+    /*
     if (ch=='q')
 	{
 	  return;
@@ -841,7 +967,7 @@ putMsg(2,syscom);
 	    }
 	  else
 	    putMsg(2,"Cancelled!");
-	} */
+	} *//*
     else if (ch=='v') 
 	{
           step = currentStep ;
@@ -882,21 +1008,82 @@ putMsg(2,syscom);
 	{
 	  sprintf(temp,"Unknown command: %c",ch);
 	  putMsg(msg_h-2,temp);
-	}
+	}*/
     }
   return;
+}
+void serial_back(const std_msgs::String::ConstPtr& msg){
+	//ROS_INFO("I heard: [%s]", msg->data.c_str());
+	const char *catstr = " -- HEARD --";
+	const char *mes = msg->data.c_str();
+	putRsw(5,mes);
+	putRsw(4, catstr);  
+}
+void servo_back(const std_msgs::String::ConstPtr& msg){
+	const char *catstr = " -- HEARD --";
+	const char *mes = msg->data.c_str();
+	putRsw(5,mes);
+	putRsw(4, catstr);  
+}
+void analog_back(const std_msgs::String::ConstPtr& msg){
+	const char *catstr = " -- HEARD --";
+	const char *mes = msg->data.c_str();
+	putRsw(5,mes);
+	putRsw(4, catstr);  
+}
+void digital_back(const std_msgs::String::ConstPtr& msg){
+	const char *catstr = " -- HEARD -- ";
+	const char *mes = msg->data.c_str();
+	putRsw(5,mes);
+	putRsw(4, catstr);  
 }
 //====================================
 int main(int argc, char *argv[])
 //====================================
 {
+	count = 0;
+
+
+	
+	/**
+	 * Init publishers
+	 */
+	ros::init(argc, argv, "simuino");
+	ros::NodeHandle n;
+
+	serial_pub = n.advertise<std_msgs::String>("serialOut", 1000);
+	servo_pub = n.advertise<std_msgs::String>("servoOut", 1000);
+	analog_pub = n.advertise<std_msgs::String>("analogPinsOut", 1000);
+	digital_pub = n.advertise<std_msgs::String>("digitalPinsOut", 1000);
+	
+	/**
+	 * Init subscribers
+	 */
+	serial_sub = n.subscribe("serialOut", 1000, serial_back);
+	servo_sub = n.subscribe("servoOut", 1000, servo_back);
+	analog_sub = n.subscribe("serialOut", 1000, analog_back);
+	digital_sub = n.subscribe("serialOut", 1000, digital_back);
+
+	
+	/**
+	 * Init msg types
+	 */
+   
+
+
+	//ros::spin();
+
+
+
+
+  char call[200];
   char syscom[120];
   int ch,i,x;
 
   currentStep = 1;
   currentLoop = 0;
 
-
+  system("ls -l");
 
   strcpy(gplFile,"gpl.txt");
 
@@ -944,12 +1131,14 @@ int main(int argc, char *argv[])
 
   readMsg(gplFile);
 
-  openCommand();
+  openCommand(argv);
   
   delwin(uno);
   delwin(ser);
   delwin(slog);
+  delwin(rsw);
   delwin(msg);
+
   endwin();
 
   fclose(err);

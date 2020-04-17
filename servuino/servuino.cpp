@@ -132,10 +132,10 @@ FILE *f_pinmod,*f_digval,*f_anaval,*f_pinrw;
 
 #include "arduino.h"
 #include "code.h"
-#include "common_lib.c"
+#include "common_lib.cpp"
 #include "servuino.h"
-#include "servuino_lib.c"
-#include "arduino_lib.c"
+#include "servuino_lib.cpp"
+#include "arduino_lib.cpp"
 #include "sketch.ino"
 void setup();
 void loop();
