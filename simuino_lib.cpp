@@ -2029,7 +2029,11 @@ void displayStatus()
   //create vectors to act as pins per step
   std::vector<int> dig_arr;
   std::vector<int> ana_arr;
-
+  std_msgs::Int32MultiArray dig_Ros;
+  std_msgs::Int32MultiArray ana_Ros;
+  dig_Ros.data.clear();
+  ana_Ros.data.clear();
+  ros::Rate loop_rate(10);
   // Action event
   for (pin = 0; pin < max_totPin; pin++)
   {
@@ -2037,12 +2041,13 @@ void displayStatus()
     if (pin < max_digPin)
     {
       dig_arr.push_back(value);
-
+      dig_Ros.data.push_back(value);
       wmove(uno, digActRow[pin], digActCol[pin]);
     }
     else
     {
       ana_arr.push_back(value);
+      ana_Ros.data.push_back(value);
       wmove(uno, anaActRow[pin - max_digPin], anaActCol[pin - max_digPin]);
     }
     if (value == 1)
@@ -2057,6 +2062,11 @@ void displayStatus()
    * Put ros msg here to spin out after change in pins
    **/
 
+  putRsw(2, "Published vector");
+  digital_pub.publish(dig_Ros);
+  ros::spinOnce();
+  loop_rate.sleep();
+  ++count;
   // For purposes of error checking, output to file
   for (int i = 0; i < dig_arr.size(); i++)
   {

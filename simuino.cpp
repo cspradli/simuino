@@ -293,14 +293,17 @@ FILE *err;
 #include "ros/ros.h"
 #include "std_msgs/String.h"
 #include "ros/package.h"
+#include "std_msgs/MultiArrayLayout.h"
+#include "std_msgs/MultiArrayDimension.h"
 
+#include "std_msgs/Int32MultiArray.h"
 /**
  * Prototypes for all callbacks
  */
-void serial_back(const std_msgs::String::ConstPtr &msg);
-void servo_back(const std_msgs::String::ConstPtr &msg);
-void analog_back(const std_msgs::String::ConstPtr &msg);
-void digital_back(const std_msgs::String::ConstPtr &msg);
+//void serial_back(const std_msgs::Int32MultiArray::ConstPtr &msg);
+//void servo_back(const std_msgs::String::ConstPtr &msg);
+//void analog_back(const std_msgs::String::ConstPtr &msg);
+//void digital_back(const std_msgs::Int32MultiArray::ConstPtr &msg);
 
 /**
  * Make publishers and subscribers global
@@ -445,21 +448,11 @@ void openCommand(char *argv[])
 	g_silent = 0;
 
 	readMsg(gplFile);
-	ros::Rate loop_rate(10);
+	
 
 	while (strstr(str, "ex") == NULL)
 	{
-		std_msgs::String msge;
-		std::stringstream ss;
-		ss << "hello world " << count;
-		msge.data = ss.str();
-		//ROS_INFO("%s", msge.data.c_str());
-		const char *mes = msge.data.c_str();
-		putRsw(2, mes);
-		serial_pub.publish(msge);
-		ros::spinOnce();
-		loop_rate.sleep();
-		++count;
+
 		anyErrors();
 		unoInfo();
 
@@ -778,9 +771,10 @@ void runMode(int stop)
 
 	putMsg(3, "Run Mode. Press h for help.");
 	printf("Run Mode. Press h for help\n");
-	ros::Rate loop_rate(10);
+	//ros::Rate loop_rate(10);
 	while (1)
 	{
+		/*
 		std_msgs::String msge;
 		std::stringstream ss;
 		ss << "hello world " << count;
@@ -791,7 +785,7 @@ void runMode(int stop)
 		serial_pub.publish(msge);
 		ros::spinOnce();
 		loop_rate.sleep();
-		++count;
+		++count;*/
 		if (g_debug == 1)
 			readFile(g_currentSketch, g_lineSketch[currentStep]);
 
@@ -1032,9 +1026,10 @@ putMsg(2,syscom);
 	}
 	return;
 }
+/*
 void serial_back(const std_msgs::String::ConstPtr &msg)
 {
-	//ROS_INFO("I heard: [%s]", msg->data.c_str());
+	ROS_INFO("I heard: [%s]", msg->data.c_str());
 	const char *catstr = " -- HEARD --";
 	const char *mes = msg->data.c_str();
 	putRsw(5, mes);
@@ -1054,13 +1049,13 @@ void analog_back(const std_msgs::String::ConstPtr &msg)
 	putRsw(5, mes);
 	putRsw(4, catstr);
 }
-void digital_back(const std_msgs::String::ConstPtr &msg)
+void digital_back(const std_msgs::Int32MultiArray::ConstPtr &msg)
 {
 	const char *catstr = " -- HEARD -- ";
 	const char *mes = msg->data.c_str();
 	putRsw(5, mes);
 	putRsw(4, catstr);
-}
+}*/
 //====================================
 int main(int argc, char *argv[])
 //====================================
@@ -1076,15 +1071,15 @@ int main(int argc, char *argv[])
 	serial_pub = n.advertise<std_msgs::String>("serialOut", 1000);
 	servo_pub = n.advertise<std_msgs::String>("servoOut", 1000);
 	analog_pub = n.advertise<std_msgs::String>("analogPinsOut", 1000);
-	digital_pub = n.advertise<std_msgs::String>("digitalPinsOut", 1000);
+	digital_pub = n.advertise<std_msgs::Int32MultiArray>("digitalPinsOut", 1000);
 
 	/**
 	 * Init subscribers
 	 */
-	serial_sub = n.subscribe("serialOut", 1000, serial_back);
-	servo_sub = n.subscribe("servoOut", 1000, servo_back);
-	analog_sub = n.subscribe("serialOut", 1000, analog_back);
-	digital_sub = n.subscribe("serialOut", 1000, digital_back);
+	//serial_sub = n.subscribe("serialOut", 1000, serial_back);
+	//servo_sub = n.subscribe("servoOut", 1000, servo_back);
+	//analog_sub = n.subscribe("serialOut", 1000, analog_back);
+	//digital_sub = n.subscribe("digitalPinsOut", 1000, digital_back);
 
 	/**
 	 * Init msg types
