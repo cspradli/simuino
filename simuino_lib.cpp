@@ -267,25 +267,29 @@ void winLog()
 void winRsw()
 //====================================
 {
-  int i,k;
-  char filler[120];
-
-  wmove(rsw,1,1);
-  //fill(log_w-strlen(simulation[currentStep+1]),filler,' ');
-  wprintw(slog,"Ros>%s%s",simulation[currentStep+1],filler);
-  for(i=1;i<log_h-2;i++)
+  int value = 0;
+  int pin = 0;
+  for(pin=0;pin<max_totPin;pin++)
     {
-      wmove(rsw,i+1,1);
-      k = currentStep - i+1;
-      if(k>0)
-	{
-	  fill(log_w-strlen(simulation[k]),filler,' ');
-	  wprintw(rsw,"[%d,%d] %s%s",k,stepLoop[k],simulation[k],filler);
-	}
-      else
-	wprintw(rsw,"%s",logBlankRow);
+      value = x_pinDigValue[pin][currentStep];
+      char *tmp;
+      if(pin < max_digPin){
+        putRsw(7, "DIG");
+      }
+      else{
+      
+      }
+
+
+      if(value == HIGH)
+	    {
+                putRsw(5, "High");
+	    }
+      else if(value==LOW)
+	    {
+                putRsw(6, "Low");
+	    }
     }
-  show(rsw);
 }
 //====================================
 void winSer()
@@ -807,7 +811,7 @@ void readSimulation()
 	  
 	  if(row[0] == '+')
 	    {
-	      //printf("%s",row);
+	      //printf("%s\n",row);
 	      p = strstr(row," ? ");
 	      p = p+3;
 	      g_steps++;
@@ -1762,6 +1766,10 @@ int readStatus()
 	      while (pch != NULL)
 		{
 		  x_pinDigValue[pin][step] = atoi(pch);
+      //printf("%s\n", pch);
+      //char temp[400];
+      //sprintf(temp, "Dig Pin: %d, %d: %d\n", pin, step, x_pinDigValue[pin][step]);
+      //putRsw(10, temp);
       //printf("Dig Pin: %d, %d: %d\n", pin, step, x_pinDigValue[pin][step]);
 		  //printf("DIGstep=%d pin=%d value=%d\n",step,pin,x_pinMode[pin][step]);
 		  pin++;
@@ -1896,8 +1904,7 @@ void displayStatus()
   // Digital Pin Mode
   for(pin=0;pin<max_digPin;pin++)
     {
-      //mode = digitalMode[pin];
-      mode = x_pinMode[pin][currentStep];
+
       wmove(uno,digPinRow[pin]-1,digPinCol[pin]);
       if(pin < 22)
 	waddch(uno,ACS_VLINE);
@@ -1944,7 +1951,20 @@ void displayStatus()
 	wprintw(uno,"   ");  
 
     }
-
+  /**
+  if(currentStep % 2 == 0){
+  char *digpins;
+  char *catstr;
+  for(int i=0; i<max_totPin; i++){
+    if(i < max_digPin){
+    sprintf(digpins, " %d ", x_pinDigValue[i][currentStep]);
+    strcat(catstr, digpins);
+    }
+  }
+  wclear(rsw);
+  wprintw(rsw, catstr);
+  }
+  **/
   // Digital Pin Value
   for(pin=0;pin<max_totPin;pin++)
     {
@@ -1979,15 +1999,22 @@ void displayStatus()
 	wprintw(uno,"   -",value);
     }
   
+  //create vectors to act as pins per step
+  std::vector<int> dig_arr;
+  std::vector<int> ana_arr;
+
   // Action event
   for(pin=0;pin<max_totPin;pin++)
-    {
+    { 
       value = x_pinRW[pin][currentStep];
-      if(pin < max_digPin)
+      if(pin < max_digPin){
+      dig_arr.push_back(value);
+      
 	wmove(uno,digActRow[pin],digActCol[pin]);
-      else
+      }else{
+      ana_arr.push_back(value);
 	wmove(uno,anaActRow[pin-max_digPin],anaActCol[pin-max_digPin]);
-
+      }
       if(value == 1)
 	wprintw(uno,"R");
       else if(value == 2)
@@ -1996,6 +2023,11 @@ void displayStatus()
 	wprintw(uno," ");	
     }
 
+  // For purposes of error checking, output to file
+  for(int i=0; i < dig_arr.size(); i++){
+    file_out << dig_arr.at(i) << ' ';
+  }
+  file_out << "\n";
 
   show(uno);
 }

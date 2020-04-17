@@ -26,7 +26,7 @@
 #include <ncurses.h>
 #include <sys/stat.h>
 #include <form.h>
-
+#include <fstream>
 
 
 #include "servuino/common.h"
@@ -320,6 +320,7 @@ ros::Subscriber servo_sub;
 ros::Subscriber analog_sub;
 ros::Subscriber digital_sub;
 
+std::ofstream file_out; 
 
 
 int count;
@@ -799,6 +800,8 @@ void runMode(int stop)
 	  	runLoop(S_FORWARD);
 	  } else if (ch=='q') {
 	  	return;
+	  } else if (ch=='g') {
+		  runAll(g_steps);
 	  }
     /*
     if (ch=='q')
@@ -1074,7 +1077,8 @@ int main(int argc, char *argv[])
 	//ros::spin();
 
 
-
+  file_out.open("vect.txt");
+  file_out << "\n";
 
   char call[200];
   char syscom[120];
@@ -1140,7 +1144,7 @@ int main(int argc, char *argv[])
   delwin(msg);
 
   endwin();
-
+  file_out.close();
   fclose(err);
 
 }
