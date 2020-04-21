@@ -1069,8 +1069,8 @@ int main(int argc, char *argv[])
 	ros::NodeHandle n;
 
 	serial_pub = n.advertise<std_msgs::String>("serialOut", 1000);
-	servo_pub = n.advertise<std_msgs::String>("servoOut", 1000);
-	analog_pub = n.advertise<std_msgs::String>("analogPinsOut", 1000);
+	servo_pub = n.advertise<std_msgs::Int32MultiArray>("servoOut", 1000);
+	analog_pub = n.advertise<std_msgs::Int32MultiArray>("analogPinsOut", 1000);
 	digital_pub = n.advertise<std_msgs::Int32MultiArray>("digitalPinsOut", 1000);
 
 	/**
