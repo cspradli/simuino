@@ -1063,11 +1063,16 @@ int main(int argc, char *argv[])
 	count = 0;
 
 	/**
-	 * Init publishers
+	 * Init ROS node of name Simuino
+	 * Node handle named n
 	 */
 	ros::init(argc, argv, "simuino");
 	ros::NodeHandle n;
 
+	/**
+	 * Initialize ROS subscribers
+	 *
+	 **/
 	serial_pub = n.advertise<std_msgs::String>("serialOut", 1000);
 	servo_pub = n.advertise<std_msgs::Int32MultiArray>("servoOut", 1000);
 	analog_pub = n.advertise<std_msgs::Int32MultiArray>("analogPinsOut", 1000);

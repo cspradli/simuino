@@ -186,7 +186,7 @@ void showError(const char *m, int value)
   char err_msg[300];
   strcpy(err_msg, "SimuinoERROR: ");
   strcat(err_msg, m);
-  fprintf(err, "%s %d\n", err_msg, value, -1);
+  fprintf(err, "%s %d\n", err_msg, value);
   error = 1;
 }
 
@@ -2042,12 +2042,14 @@ void displayStatus()
     {
       dig_arr.push_back(value);
       dig_Ros.data.push_back(value);
+      putRsw(2, "ROS> digital_pins: published pins");
       wmove(uno, digActRow[pin], digActCol[pin]);
     }
     else
     {
       ana_arr.push_back(value);
       ana_Ros.data.push_back(value);
+      putRsw(3, "ROS> analog_pins: published_pins");
       wmove(uno, anaActRow[pin - max_digPin], anaActCol[pin - max_digPin]);
     }
     if (value == 1)
@@ -2062,10 +2064,10 @@ void displayStatus()
    * Put ros msg here to spin out after change in pins
    **/
 
-  putRsw(2, "Published digital_pin vector");
-  
+  //putRsw(2, "Published digital_pin vector");
   //putRsw(3, "Published analog_pin vector");
   digital_pub.publish(dig_Ros);
+  analog_pub.publish(ana_Ros);
   ros::spinOnce();
   loop_rate.sleep();
   ++count;
