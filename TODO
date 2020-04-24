@@ -1,6 +1,6 @@
-[ ] Send digi pins output through ROS
-[ ] Send analog pins output through ROS
+[X] Send digi pins output through ROS
+[X] Send analog pins output through ROS
+[ ] Send serial output through publisher
 [ ] Get digi pins input through subscriber
 [ ] Get analog pins input through subscriber
-[ ] Send serial output through publisher
 [ ] Get serial input through publisher

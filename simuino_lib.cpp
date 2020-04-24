@@ -2040,8 +2040,17 @@ void displayStatus()
     value = x_pinRW[pin][currentStep];
     if (pin < max_digPin)
     {
-      dig_arr.push_back(value);
-      dig_Ros.data.push_back(value);
+      //If 2 or 1 as value, value--
+      //We don't want to change entirely due to
+      //how servuino handles those values
+      if(value == 2 || value == 1){
+        dig_arr.push_back(value-1);
+        dig_Ros.data.push_back(value-1);
+      } else {
+        dig_arr.push_back(value);
+        dig_Ros.data.push_back(value);
+      }
+
       putRsw(2, "ROS> digital_pins: published pins");
       wmove(uno, digActRow[pin], digActCol[pin]);
     }
@@ -2074,10 +2083,13 @@ void displayStatus()
   // For purposes of error checking, output to file
   for (int i = 0; i < dig_arr.size(); i++)
   {
-    file_out << dig_arr.at(i) << ' ';
+    digi_out << dig_arr.at(i) << ' ';
   }
-  file_out << "\n";
-
+  digi_out << "\n";
+  for(int i = 0; i < ana_arr.size(); i++){
+    ana_out << ana_arr.at(i) << ' ';
+  }
+  ana_out << "\n";
   show(uno);
 }
 

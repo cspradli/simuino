@@ -318,7 +318,10 @@ ros::Subscriber servo_sub;
 ros::Subscriber analog_sub;
 ros::Subscriber digital_sub;
 
-std::ofstream file_out;
+std::ofstream digi_out;
+std::ofstream ana_out;
+std::ofstream ser_out;
+std::ofstream serv_out;
 
 int count;
 
@@ -1092,8 +1095,14 @@ int main(int argc, char *argv[])
 
 	//ros::spin();
 
-	file_out.open("vect.txt");
-	file_out << "\n";
+	digi_out.open("logs/digitalPin_log");
+	ana_out.open("logs/analogPin_log");
+	ser_out.open("logs/serial_log");
+	serv_out.open("logs/servo_log");
+	digi_out << "\n";
+	ana_out << "\n";
+	ser_out << "\n";
+	serv_out << "\n";
 
 	char call[200];
 	char syscom[120];
@@ -1158,7 +1167,12 @@ int main(int argc, char *argv[])
 	delwin(msg);
 
 	endwin();
-	file_out.close();
+	
+	digi_out.close();
+	ana_out.close();
+	ser_out.close();
+	serv_out.close();
+
 	fclose(err);
 }
 //====================================
