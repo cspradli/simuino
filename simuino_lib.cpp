@@ -82,16 +82,11 @@ int analyzeEvent(char *event)
         g_pinType = ANA;
       if (strstr(event, "digital"))
         g_pinType = DIG;
-      //printf("ANEV: %s", p);
       return (g_pinType);
     }
     return (0);
   }
 }
-
-/**
- * Main window GUI for the Simuino
- */
 //====================================
 void show(WINDOW *win)
 //====================================
@@ -103,9 +98,9 @@ void show(WINDOW *win)
   {
     wmove(win, 0, 2);
     if (confBoardType == UNO)
-      wprintw(win, "SIMUINO - Arduino UNO Pin Analyzer 0.1.8 ");
+      wprintw(win, "SIMUINO - Arduino UNO Pin Analyzer 0.2.3 ");
     if (confBoardType == MEGA)
-      wprintw(win, "SIMUINO - Arduino MEGA Pin Analyzer 0.1.8 ");
+      wprintw(win, "SIMUINO - Arduino MEGA Pin Analyzer 0.2.3 ");
     wmove(win, 1, 2);
     wprintw(uno, "Sketch: %s", g_currentSketch);
     wmove(win, 2, 2);
@@ -142,11 +137,6 @@ void show(WINDOW *win)
     wmove(win, 0, 2);
     wprintw(win, "----------Messages----------");
   }
-  if (win == rsw)
-  {
-    wmove(win, 0, 2);
-    wprintw(win, "----------ROS----------");
-  }
 
   wmove(uno, board_h - 2, 4);
   wprintw(uno, "                  ");
@@ -154,15 +144,7 @@ void show(WINDOW *win)
   wrefresh(uno);
   wrefresh(win);
 }
-//====================================
-void putRsw(int line, const char *message)
-//====================================
-{
-  wmove(rsw, line, 1);
-  wprintw(rsw, message);
-  show(rsw);
-  return;
-}
+
 //====================================
 void putMsg(int line, const char *message)
 //====================================
@@ -198,7 +180,7 @@ void saveSetting()
   time_t lt;
 
   // Store setting
-  out = fopen("~/catkin_ws/src/arduino_link/src/simuino/settings.txt", "w");
+  out = fopen("settings.txt", "w");
   if (out == NULL)
   {
     showError("No setting file ", -1);
@@ -235,77 +217,72 @@ void resetFile(const char *filename)
 }
 
 //====================================
-void fill(int len, char *p, char c)
+static void showTruncatedLine(WINDOW *win, int max, const char *fmt, ...)
 //====================================
 {
-  int i;
+  va_list argp;
+  char out_line[120 + MAX_SERIAL_BUFFER];
+  int len;
+  char *p;
 
-  if (len > 0)
+  va_start(argp, fmt);
+  len = vsnprintf(out_line, max, fmt, argp);
+  if (len < max)
   {
-    for (i = 0; i < len; i++)
-      p[i] = c;
-    p[len] = '\0';
+    strcpy(out_line + len, logBlankRow + sizeof(logBlankRow) - (max - len));
   }
+  if ((p = strchr(out_line, '\n')))
+  {
+    *p = ' ';
+  }
+  out_line[max] = '\0';
+  wprintw(win, "%s", out_line);
+  va_end(argp);
 }
+
+static int bottom_up = 0;
 //====================================
-void winLog()
+void winLog() // show log lines in selectable order
 //====================================
 {
   int i, k;
-  char filler[120];
+  int first, last, incr;
+  char out_line[120 + MAX_SERIAL_BUFFER];
+  char *p;
 
-  wmove(slog, 1, 1);
-  fill(log_w - strlen(simulation[currentStep + 1]), filler, ' ');
-  wprintw(slog, "next>%s%s", simulation[currentStep + 1], filler);
+  wmove(slog, bottom_up ? log_h - 2 : 1, 1);
+  showTruncatedLine(slog, log_w, "next>%s", simulation[currentStep + 1]);
   for (i = 1; i < log_h - 2; i++)
   {
-    wmove(slog, i + 1, 1);
+    int pos;
+    pos = i + 1;
+    if (bottom_up)
+    {
+      pos = log_h - pos - 1;
+    }
+    wmove(slog, pos, 1);
     k = currentStep - i + 1;
     if (k > 0)
     {
-      fill(log_w - strlen(simulation[k]), filler, ' ');
-      wprintw(slog, "[%d,%d] %s%s", k, stepLoop[k], simulation[k], filler);
+      showTruncatedLine(slog, log_w, "[%d,%d] %s", k, stepLoop[k], simulation[k]);
     }
     else
-      wprintw(slog, "%s", logBlankRow);
+    {
+      showTruncatedLine(slog, log_w, logBlankRow);
+    }
   }
   show(slog);
 }
-//====================================
-void winRsw()
-//====================================
-{
-  int value = 0;
-  int pin = 0;
-  for (pin = 0; pin < max_totPin; pin++)
-  {
-    value = x_pinDigValue[pin][currentStep];
-    char *tmp;
-    if (pin < max_digPin)
-    {
-      putRsw(7, "DIG");
-    }
-    else
-    {
-    }
 
-    if (value == HIGH)
-    {
-      putRsw(5, "High");
-    }
-    else if (value == LOW)
-    {
-      putRsw(6, "Low");
-    }
-  }
-}
 //====================================
 void winSer()
 //====================================
 {
+  std_msgs::String serial_msg;
+  std::stringstream ss;
   int i, j, k = 0, m = 0, prevL = 1;
   char buf[MAX_STEP][240];
-  char filler[120];
+  char out_line[120 + MAX_SERIAL_BUFFER];
 
   for (i = 1; i <= currentStep; i++)
   {
@@ -326,15 +303,28 @@ void winSer()
   wmove(ser, 1, 1);
   for (i = 1; i < ser_h - 1; i++)
   {
-    wmove(ser, i, 1);
+    int pos;
+    char *p;
+    pos = i;
+    if (bottom_up)
+    {
+      pos = ser_h - pos - 1;
+    }
+    wmove(ser, pos, 1);
     k = m - i + 1;
     if (k > 0)
     {
-      fill(ser_w - strlen(buf[k]), filler, ' ');
-      wprintw(ser, "%s%s", buf[k], filler);
+      //printf("Serial: %s\n", buf[k]);
+      ss << buf[k];
+      serial_msg.data = ss.str();
+      serial_pub.publish(serial_msg);
+      ros::spinOnce();
+      showTruncatedLine(ser, ser_w, "%s", buf[k]);
     }
     else
-      wprintw(ser, "%s", logBlankRow);
+    {
+      showTruncatedLine(ser, log_w, logBlankRow);
+    }
   }
 
   show(ser);
@@ -817,7 +807,6 @@ void readSimulation()
 
       if (row[0] == '+')
       {
-        //printf("%s\n",row);
         p = strstr(row, " ? ");
         p = p + 3;
         g_steps++;
@@ -920,7 +909,7 @@ void showScenario(char *fileName)
 }
 
 //====================================
-void selectProj(int projNo, char *projName, char **argv)
+void selectProj(int projNo, char *projName)
 //====================================
 {
   FILE *in;
@@ -958,11 +947,7 @@ void readMsg(char *fileName)
   FILE *in;
   char row[SIZE_ROW], temp[SIZE_ROW], *p;
   int i = 0, ch;
-  //char path[200];
-  //strcpy(path, "~/catkin_ws/src/arduino_link/src/simuino/");
-  //strcat(path, fileName);
 
-  //showError("in read msg",-1);
   wclear(msg);
   in = fopen(fileName, "r");
   if (in == NULL)
@@ -1018,8 +1003,10 @@ void readFile(char *fileName, int line)
 //====================================
 {
   FILE *in;
-  char row[SIZE_ROW], temp[10];
-  int i = 0, from, to;
+  char row[SIZE_ROW], temp[20];
+  int i = 0, k = 0, from, to, lines_in_file = 0;
+
+  lines_in_file = countRowsInFile(fileName);
 
   wclear(msg);
   in = fopen(fileName, "r");
@@ -1030,10 +1017,17 @@ void readFile(char *fileName, int line)
   }
   else
   {
-    if (line > msg_h)
+    if (lines_in_file > msg_h)
     {
-      from = line - msg_h / 2;
-      to = line + msg_h / 2;
+      if (line > msg_h / 2)
+        from = line - msg_h / 2;
+      else
+        from = 0;
+
+      if ((lines_in_file - line) > msg_h / 2)
+        to = line + msg_h / 2;
+      else
+        to = lines_in_file;
     }
     else
     {
@@ -1045,10 +1039,12 @@ void readFile(char *fileName, int line)
     while (fgets(row, SIZE_ROW, in) != NULL)
     {
       i++;
-      if (i > from && i < to)
+      if (i >= from && i <= to)
       {
-        wmove(msg, i, 1);
-        wprintw(msg, " ");
+        k++;
+        wmove(msg, k, 1);
+        //sprintf(temp,"[%d,%d,%d,%d,%d]",i,msg_h,from,to,lines_in_file);
+        //wprintw(msg,temp);
         if (i == line)
         {
           sprintf(temp, "[%d]:>", i);
@@ -1097,7 +1093,6 @@ void init(int mode)
   delwin(ser);
   delwin(slog);
   delwin(msg);
-  delwin(rsw);
 
   // Up
   initscr();
@@ -1225,7 +1220,7 @@ void init(int mode)
   for (i = 0; i < max_digPin; i++)
   {
     wmove(uno, digIdRow[i], digIdCol[i]);
-    wprintw(uno, "D%2d", i);
+    wprintw(uno, "%2d", i);
   }
   for (i = 0; i < max_digPin; i++)
   {
@@ -1239,7 +1234,7 @@ void init(int mode)
   for (i = 0; i < max_anaPin; i++)
   {
     wmove(uno, ap - 1, anaPinCol[i] - 1);
-    wprintw(uno, "B%1d", i);
+    wprintw(uno, "A%1d", i);
   }
   //for(i=0;i<max_anaPin;i++){wmove(uno,anaValRow[i],anaValCol[i]); waddch(uno,ACS_BULLET);}
   for (i = 0; i < max_anaPin; i++)
@@ -1267,11 +1262,6 @@ void init(int mode)
     ser_w = s_col - board_w - log_w;
     ser_x = 0;
     ser_y = board_w + log_w;
-
-    ros_h = msg_h / 2;
-    ros_w = board_w;
-    ros_x = board_h;
-    ros_y = 0;
   }
 
   if (mode == 1) // 50 on 50
@@ -1290,11 +1280,6 @@ void init(int mode)
     ser_w = s_col - board_w;
     ser_x = s_row / 2;
     ser_y = board_w;
-
-    ros_h = msg_h / 2;
-    ros_w = board_w;
-    ros_x = board_h;
-    ros_y = 0;
   }
 
   if (mode == 2) // 90 on 10
@@ -1313,11 +1298,6 @@ void init(int mode)
     ser_w = s_col - board_w;
     ser_x = log_h;
     ser_y = board_w;
-
-    ros_h = msg_h / 2;
-    ros_w = board_w;
-    ros_x = board_h;
-    ros_y = 0;
   }
 
   if (mode == 3) // 10 on 90
@@ -1336,11 +1316,6 @@ void init(int mode)
     ser_w = s_col - board_w;
     ser_x = log_h;
     ser_y = board_w;
-
-    ros_h = msg_h / 2;
-    ros_w = board_w;
-    ros_x = board_h;
-    ros_y = 0;
   }
 
   if (mode == 4) // big message to the right. Log on Ser
@@ -1359,11 +1334,6 @@ void init(int mode)
     ser_w = board_w;
     ser_x = log_h + board_h;
     ser_y = 0;
-
-    ros_h = msg_h / 2;
-    ros_w = board_w;
-    ros_x = board_h;
-    ros_y = 0;
   }
 
   if (mode == 5) // big message to the right. Log and Ser side by side
@@ -1382,14 +1352,9 @@ void init(int mode)
     ser_w = board_w / 2;
     ser_x = board_h;
     ser_y = log_w;
-
-    ros_h = msg_h / 2;
-    ros_w = board_w;
-    ros_x = board_h;
-    ros_y = 0;
   }
 
-  msg = newwin(ser_h, ser_w, ser_x, ser_y);
+  msg = newwin(msg_h, msg_w, msg_x, msg_y);
   scrollok(msg, true);
   wbkgd(msg, COLOR_PAIR(MSG_COLOR));
   show(msg);
@@ -1404,10 +1369,6 @@ void init(int mode)
   wbkgd(ser, COLOR_PAIR(SER_COLOR));
   show(ser);
 
-  rsw = newwin(msg_h, msg_w, msg_x, msg_y);
-  scrollok(rsw, true);
-  wbkgd(ser, COLOR_PAIR(LOG_COLOR));
-  show(rsw);
   for (i = 0; i < log_w; i++)
     logBlankRow[i] = ' ';
   logBlankRow[i] = '\0';
@@ -1602,7 +1563,7 @@ void anyErrors()
 //====================================
 {
   int x;
-  char syscom[500];
+  char syscom[200];
 
   g_existError = S_NO;
   x = system("rm temp.txt");
@@ -1615,7 +1576,7 @@ void anyErrors()
     g_currentSketchStatus = SO_RUN_ERROR;
   }
   if (x == 999)
-    putMsg(2, "Yo, Unable to read error file");
+    putMsg(2, "Unable to read error file");
   show(uno);
 }
 
@@ -1624,22 +1585,11 @@ int loadSketch(char sketch[])
 //====================================
 {
   int x, ch, res;
-  char syscom[520];
+  char syscom[120];
 
-  sprintf(syscom, "cp %s %s > %s 2>&1;", sketch, fileServSketch, fileCopyError);
-  x = system(syscom);
-  //strcpy(confSketchFile,sketch);
-  char temp[200];
-  char temp2[200];
-  strcpy(temp2, "~/catkin_ws/src/arduino_link/src/simuino/");
-  strcpy(temp, "~/catkin_ws/src/arduino_link/src/simuino/");
-  strcat(temp, fileServSketch);
-  strcat(temp2, sketch);
-  //printf("Load 1: %s", temp);
-  //printf("Load 2: %s", temp2);
   instrument(sketch, fileServSketch);
 
-  sprintf(syscom, "cd ../../src/arduino_link/src/simuino/servuino; g++ -O2 -o servuino servuino.cpp > g++.result 2>&1;");
+  sprintf(syscom, "cd servuino; g++ -O2 -o servuino servuino.cpp > g++.result 2>&1;");
   x = system(syscom);
 
   x = countRowsInFile(fileServComp);
@@ -1647,14 +1597,12 @@ int loadSketch(char sketch[])
   {
     readMsg(fileServComp);
     wmove(msg, msg_h - 2, 1);
-    wprintw(msg, "Oh no: press any key to continue >>");
+    wprintw(msg, "press any key to continue >>");
     wrefresh(msg);
     ch = getchar();
-    putMsg(2, "ERROR: Check your sketch or report an issue to Simuino");
+    putMsg(2, "Check your sketch or report an issue to Simuino");
     return (1);
   }
-  wprintw(msg, "Oh no: press any key to continue >>");
-  wrefresh(msg);
   readSketchInfo();
   return (0);
 }
@@ -1756,14 +1704,14 @@ int readStatus()
         sscanf(row, "%s%d", junk, &step);
         //printf("%d pinmod %s",step,p);
         //strcpy(data,p);
-        pch = strtok(p, ":");
+        pch = strtok(p, ",");
         pin = 0;
         while (pch != NULL)
         {
           x_pinMode[pin][step] = atoi(pch);
           //printf("step=%d pin=%d value=%d\n",step,pin,x_pinMode[pin][step]);
           pin++;
-          pch = strtok(NULL, ":");
+          pch = strtok(NULL, ",");
         }
       }
     }
@@ -1786,21 +1734,16 @@ int readStatus()
         p = strstr(row, " ? ");
         p = p + 3;
         sscanf(row, "%s%d", junk, &step);
-        //printf("%d D: %s", step,p);
+        //printf("%d pinmod %s",step,p);
         //strcpy(data,p);
-        pch = strtok(p, ":");
+        pch = strtok(p, ",");
         pin = 0;
         while (pch != NULL)
         {
           x_pinDigValue[pin][step] = atoi(pch);
-          //printf("%s\n", pch);
-          //char temp[400];
-          //sprintf(temp, "Dig Pin: %d, %d: %d\n", pin, step, x_pinDigValue[pin][step]);
-          //putRsw(10, temp);
-          //printf("Dig Pin: %d, %d: %d\n", pin, step, x_pinDigValue[pin][step]);
           //printf("DIGstep=%d pin=%d value=%d\n",step,pin,x_pinMode[pin][step]);
           pin++;
-          pch = strtok(NULL, ":");
+          pch = strtok(NULL, ",");
         }
       }
     }
@@ -1823,7 +1766,7 @@ int readStatus()
         p = strstr(row, " ? ");
         p = p + 3;
         sscanf(row, "%s%d", junk, &step);
-        //printf("%d A: %s", step, p);
+        //printf("%d pinmod %s",step,p);
         //strcpy(data,p);
         pch = strtok(p, ",");
         pin = 0;
@@ -1855,7 +1798,7 @@ int readStatus()
         p = strstr(row, " ? ");
         p = p + 3;
         sscanf(row, "%s%d", junk, &step);
-        //printf("%s", p);
+        //printf("%d pinmod %s",step,p);
         //strcpy(data,p);
         pch = strtok(p, ",");
         pin = 0;
@@ -1932,7 +1875,8 @@ void displayStatus()
   // Digital Pin Mode
   for (pin = 0; pin < max_digPin; pin++)
   {
-
+    //mode = digitalMode[pin];
+    mode = x_pinMode[pin][currentStep];
     wmove(uno, digPinRow[pin] - 1, digPinCol[pin]);
     if (pin < 22)
       waddch(uno, ACS_VLINE);
@@ -1978,29 +1922,28 @@ void displayStatus()
     else
       wprintw(uno, "   ");
   }
-  /**
-  if(currentStep % 2 == 0){
-  char *digpins;
-  char *catstr;
-  for(int i=0; i<max_totPin; i++){
-    if(i < max_digPin){
-    sprintf(digpins, " %d ", x_pinDigValue[i][currentStep]);
-    strcat(catstr, digpins);
-    }
-  }
-  wclear(rsw);
-  wprintw(rsw, catstr);
-  }
-  **/
+  std::vector<int> dig_arr;
+  std::vector<int> ana_arr;
+
+  std_msgs::Int32MultiArray dig_Ros;
+  std_msgs::Int32MultiArray ana_Ros;
+  dig_Ros.data.clear();
+  ana_Ros.data.clear();
+  //ros::Rate loop_rate(10);
+
   // Digital Pin Value
   for (pin = 0; pin < max_totPin; pin++)
   {
     value = x_pinDigValue[pin][currentStep];
-    if (pin < max_digPin)
-      wmove(uno, digPinRow[pin], digPinCol[pin]);
-    else
-      wmove(uno, ap, anaPinCol[pin - max_digPin]);
+    //printf("%d", value);
+    dig_arr.push_back(value);
+    dig_Ros.data.push_back(value);
+    if (pin < max_digPin){
 
+      wmove(uno, digPinRow[pin], digPinCol[pin]);
+    } else{
+      wmove(uno, ap, anaPinCol[pin - max_digPin]);
+    }
     if (value == HIGH)
     {
       waddch(uno, ACS_DIAMOND);
@@ -2015,6 +1958,8 @@ void displayStatus()
   for (pin = 0; pin < max_totPin; pin++)
   {
     value = x_pinAnaValue[pin][currentStep];
+    ana_arr.push_back(value);
+    ana_Ros.data.push_back(value);
     if (pin < max_digPin)
       wmove(uno, digValRow[pin], digValCol[pin] - 3);
     else
@@ -2026,39 +1971,14 @@ void displayStatus()
       wprintw(uno, "   -", value);
   }
 
-  //create vectors to act as pins per step
-  std::vector<int> dig_arr;
-  std::vector<int> ana_arr;
-  std_msgs::Int32MultiArray dig_Ros;
-  std_msgs::Int32MultiArray ana_Ros;
-  dig_Ros.data.clear();
-  ana_Ros.data.clear();
-  ros::Rate loop_rate(10);
   // Action event
   for (pin = 0; pin < max_totPin; pin++)
   {
     value = x_pinRW[pin][currentStep];
-    if (pin < max_digPin)
-    {
-      //If 2 or 1 as value, value--
-      //We don't want to change entirely due to
-      //how servuino handles those values
-      if(value == 2 || value == 1){
-        dig_arr.push_back(value-1);
-        dig_Ros.data.push_back(value-1);
-      } else {
-        dig_arr.push_back(value);
-        dig_Ros.data.push_back(value);
-      }
-
-      putRsw(2, "ROS> digital_pins: published pins");
+    if (pin < max_digPin){
+      //putMsg(4, "Value");
       wmove(uno, digActRow[pin], digActCol[pin]);
-    }
-    else
-    {
-      ana_arr.push_back(value);
-      ana_Ros.data.push_back(value);
-      putRsw(3, "ROS> analog_pins: published_pins");
+    } else {
       wmove(uno, anaActRow[pin - max_digPin], anaActCol[pin - max_digPin]);
     }
     if (value == 1)
@@ -2068,18 +1988,12 @@ void displayStatus()
     else
       wprintw(uno, " ");
   }
-
-  /**
-   * Put ros msg here to spin out after change in pins
-   **/
-
-  //putRsw(2, "Published digital_pin vector");
-  //putRsw(3, "Published analog_pin vector");
+  
   digital_pub.publish(dig_Ros);
   analog_pub.publish(ana_Ros);
   ros::spinOnce();
-  loop_rate.sleep();
-  ++count;
+  //loop_rate.sleep();
+  
   // For purposes of error checking, output to file
   for (int i = 0; i < dig_arr.size(); i++)
   {

@@ -771,7 +771,7 @@ void openFiles()
 //====================================
 {
   // Error logging
-  e_log = fopen("~/catkin_ws/src/arduino_link/src/simuino/servuino/serv.error","w");
+  e_log = fopen("serv.error","w");
 
 /*   // Custom Logging */
 /*   u_log = fopen("data.custom","w"); */
@@ -782,7 +782,7 @@ void openFiles()
 /*   fprintf(u_log,"# Servuino Custom Simulation Data Version: %s\n",g_version); */
 
   // Debug logging INO
-  f_ino = fopen("~/catkin_ws/src/arduino_link/src/simuino/servuino/ino.debug","w");
+  f_ino = fopen("ino.debug","w");
   if(f_ino == NULL)
     {
       errorLog("Unable to open ino.debug",0);
@@ -790,7 +790,7 @@ void openFiles()
   fprintf(f_ino,"# Servuino Debug Information Version: %s\n",g_version);
 
   // Status of pins
-  f_pinmod = fopen("~/catkin_ws/src/arduino_link/src/simuino/servuino/serv.pinmod","w");
+  f_pinmod = fopen("serv.pinmod","w");
   if(f_pinmod == NULL)
     {
       errorLog("Unable to open data.status",0);
@@ -798,7 +798,7 @@ void openFiles()
   fprintf(f_pinmod,"# Servuino Status Pin Mode Version: %s\n",g_version);
 
   // Status of pins
-  f_digval = fopen("~/catkin_ws/src/arduino_link/src/simuino/servuino/serv.digval","w");
+  f_digval = fopen("serv.digval","w");
   if(f_digval == NULL)
     {
       errorLog("Unable to open data.status",0);
@@ -806,7 +806,7 @@ void openFiles()
   fprintf(f_digval,"# Servuino Status Pin Digital Values Version: %s\n",g_version);
 
   // Status of pins
-  f_anaval = fopen("~/catkin_ws/src/arduino_link/src/simuino/servuino/serv.anaval","w");
+  f_anaval = fopen("serv.anaval","w");
   if(f_anaval == NULL)
     {
       errorLog("Unable to open data.status",0);
@@ -814,7 +814,7 @@ void openFiles()
   fprintf(f_anaval,"# Servuino Status Pin Analog Values Version: %s\n",g_version);
 
   // Status of pins
-  f_pinrw = fopen("~/catkin_ws/src/arduino_link/src/simuino/servuino/serv.pinrw","w");
+  f_pinrw = fopen("serv.pinrw","w");
   if(f_pinrw == NULL)
     {
       errorLog("Unable to open data.status",0);
@@ -823,7 +823,7 @@ void openFiles()
 
 
   // Serial logging
-  f_serial = fopen("~/catkin_ws/src/arduino_link/src/simuino/servuino/serv.serial","w");
+  f_serial = fopen("serv.serial","w");
   if(f_serial == NULL)
     {
       errorLog("Unable to open serv.serial",0);
@@ -831,7 +831,7 @@ void openFiles()
   fprintf(f_serial,"# Servuino Serial Simulation Data Version: %s\n",g_version);
 
   // Serial logging
-  f_time = fopen("~/catkin_ws/src/arduino_link/src/simuino/servuino/serv.time","w");
+  f_time = fopen("serv.time","w");
   if(f_time == NULL)
     {
       errorLog("Unable to open serv.time",0);
@@ -839,14 +839,14 @@ void openFiles()
   fprintf(f_time,"# Servuino Time Delay (microseconds) Version: %s\n",g_version);
 
   // Register logging
-  r_log = fopen("~/catkin_ws/src/arduino_link/src/simuino/servuino/data.register","w");
+  r_log = fopen("data.register","w");
   if(r_log == NULL)
     {
       errorLog("Unable to open data.register",0);
     }
   fprintf(r_log,"# Servuino Register Data Version: %s\n",g_version);
   // serv.event
-  f_event = fopen("~/catkin_ws/src/arduino_link/src/simuino/servuino/serv.event","w");
+  f_event = fopen("serv.event","w");
   if(f_event == NULL)
     {
       errorLog("Unable to open data.register",0);
@@ -854,7 +854,7 @@ void openFiles()
   fprintf(f_event,"# Servuino Event Log Version: %s\n",g_version);
 
   // serv.cust
-  f_cust = fopen("~/catkin_ws/src/arduino_link/src/simuino/servuino/serv.cust","w");
+  f_cust = fopen("serv.cust","w");
   if(f_cust == NULL)
     {
       errorLog("Unable to open data.register",0);
@@ -1225,7 +1225,7 @@ void saveScenario() // Servuino input/output
   int i,j,k,step,ok=0;
   FILE *out;
 
-  out = fopen("~/catkin_ws/src/arduino_link/src/simuino/servuino/data.scen","w");
+  out = fopen("data.scen","w");
   if(out == NULL)
     {
       errorLog("Unable to open data.scen",0);
@@ -1266,7 +1266,7 @@ void saveScenarioExpanded() // Servuino input/output
   int i,j,k,temp;
   FILE *out;
 
-  out = fopen("~/catkin_ws/src/arduino_link/src/simuino/servuino/data.scenario","w");
+  out = fopen("data.scenario","w");
   if(out == NULL)
     {
       errorLog("Unable to open data.scenario",0);
@@ -1413,7 +1413,7 @@ void readSketchInfo()
   char row[120],res[40],*p,*q,value[5];
   int pin,rows=0;
 
-  in = fopen("~/catkin_ws/src/arduino_link/src/simuino/servuino/sketch.ino","r");
+  in = fopen("sketch.ino","r");
   if(in == NULL)
     {
       errorLog("Error: Unable to open sketch",g_curStep);
@@ -1532,8 +1532,8 @@ void readScenario()
   int pin,step,value,i,j;
   int tmp=0,dCount[MAX_PIN_DIGITAL_MEGA],aCount[MAX_PIN_ANALOG_MEGA];
 
-  if(g_scenSource == 0)in = fopen("~/catkin_ws/src/arduino_link/src/simuino/servuino/sketch.ino","r");
-  if(g_scenSource == 1)in = fopen("~/catkin_ws/src/arduino_link/src/simuino/servuino/data.scen","r");
+  if(g_scenSource == 0)in = fopen("sketch.ino","r");
+  if(g_scenSource == 1)in = fopen("data.scen","r");
 
   for(i=0;i<=max_anaPin;i++)
     {
@@ -1605,7 +1605,7 @@ void readCustom()
   char row[80],res[40],*p,*q,value[5];
   int pin;
 
-  in = fopen("~/catkin_ws/src/arduino_link/src/simuino/servuino/sketch.ino","r");
+  in = fopen("sketch.ino","r");
   if(in == NULL)
     {
       errorLog("No sketch.ino",0);
